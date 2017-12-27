@@ -1,0 +1,15 @@
+{
+    "require": {
+        "google/apiclient": "^2.0",
+        "symfony/yaml": "^3.4",
+        "symfony/console": "^3.4",
+        "symfony/dotenv": "^3.4",
+        "symfony/validator": "^3.4"
+    },
+    "autoload": {
+        "psr-4": {"SniTodos\\": "src/"}
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    }
+}
