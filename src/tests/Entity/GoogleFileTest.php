@@ -34,7 +34,7 @@ class GoogleFileTest extends TestCase
         GoogleFile::setService($this->googleClient);
     }
 
-    public function testgetIdByFileName()
+    public function testGetIdByFileName()
     {
         $this->assertSame('todos_id', GoogleFile::getIdByFileName('ToDos.yml'));
         $this->assertSame('old_todos_id', GoogleFile::getIdByFileName('Old_ToDos.yml'));
