@@ -5,6 +5,7 @@ namespace SniTodos\tests\Entity;
 use PHPUnit\Framework\TestCase;
 use SniTodos\Entity\GoogleFileProxy;
 use SniTodos\Entity\GoogleFile;
+use SniTodos\Lib\Filesystem;
 
 class GoogleFileProxyTest extends TestCase
 {
@@ -29,7 +30,7 @@ class GoogleFileProxyTest extends TestCase
     public function testGetContentUncached()
     {
         $filesystem = $this
-            ->createMock('Symfony\Component\Filesystem\Filesystem');
+            ->createMock('SniTodos\Lib\Filesystem');
         $filesystem
             ->expects($this->once())
             ->method('dumpFile')
@@ -55,7 +56,7 @@ class GoogleFileProxyTest extends TestCase
     public function testGetContentCached()
     {
         $filesystem = $this
-            ->createMock('Symfony\Component\Filesystem\Filesystem');
+            ->createMock('SniTodos\Lib\Filesystem');
         $filesystem
             ->expects($this->never())
             ->method('dumpFile');
@@ -63,6 +64,10 @@ class GoogleFileProxyTest extends TestCase
             ->expects($this->once())
             ->method('exists')
             ->willReturn(true);
+        $filesystem
+            ->expects($this->once())
+            ->method('getContent')
+            ->willReturn('Some content');
 
         $content = $this->googleFile->getContent();
         $this->assertSame('Some content', $content);
@@ -70,20 +75,14 @@ class GoogleFileProxyTest extends TestCase
         $file = new GoogleFileProxy('test.yml', $this->googleFile);
         $file->setFileystem($filesystem);
 
-        // Unfortunately, the filesystem component has no wrapper for file_get_contents.
-        // Not wanting to subclass it, we need to catch the warning for testing.
-        try {
-            $content = $file->getContent();
-            $this->assertSame('Some content', $content);
-        } catch (\Exception $e) {
-            $this->assertContains('No such file', $e->getMessage());
-        }
+        $content = $file->getContent();
+        $this->assertSame('Some content', $content);
     }
 
     public function testSetContent()
     {
         $filesystem = $this
-            ->createMock('Symfony\Component\Filesystem\Filesystem');
+            ->createMock('SniTodos\Lib\Filesystem');
 
         $filesystem
             ->expects($this->once())
@@ -101,7 +100,7 @@ class GoogleFileProxyTest extends TestCase
     public function testClearCache()
     {
         $filesystem = $this
-            ->createMock('Symfony\Component\Filesystem\Filesystem');
+            ->createMock('SniTodos\Lib\Filesystem');
 
         $filesystem
             ->expects($spy = $this->once())
@@ -118,5 +117,53 @@ class GoogleFileProxyTest extends TestCase
         $this->assertEquals(1, count($params[0]));
 
         $this->assertRegExp('@.+/google-client-file-cache/test.yml$@', $params[0][0]);
+    }
+
+    public function testUploadForExistingFile()
+    {
+        $filesystem = $this
+            ->createMock('SniTodos\Lib\Filesystem');
+
+        $filesystem
+            ->expects($this->once())
+            ->method('getContent')
+            ->willReturn('Upload for existing file');
+
+        $this->googleFile
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(true);
+
+        $this->googleFile
+            ->expects($this->once())
+            ->method('updateContent');
+
+        $file = new GoogleFileProxy('test.yml', $this->googleFile);
+        $file->setFileystem($filesystem);
+        $file->upload();
+    }
+
+    public function testUploadForNewFile()
+    {
+        $filesystem = $this
+            ->createMock('SniTodos\Lib\Filesystem');
+
+        $filesystem
+            ->expects($this->once())
+            ->method('getContent')
+            ->willReturn('Upload for existing file');
+
+        $this->googleFile
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(false);
+
+        $this->googleFile
+            ->expects($this->once())
+            ->method('create');
+
+        $file = new GoogleFileProxy('test.yml', $this->googleFile);
+        $file->setFileystem($filesystem);
+        $file->upload();
     }
 }

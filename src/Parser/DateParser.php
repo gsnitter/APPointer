@@ -15,6 +15,11 @@ class DateParser {
      */
     private $now;
 
+    public function __construct()
+    {
+        $this->now = new \DateTime();
+    }
+
     /**
      * @param \DateTime $dt
      */
@@ -83,13 +88,14 @@ class DateParser {
 
     public function addYear(string $dateString): string
     {
+        $thisYear = intval($this->now->format('Y'));
         $originalString = $dateString;
-        $dateString = preg_replace('@(\D|^)(\d{2}\.\d{2})\.(\D|$)@', '$1$2.' . date('Y') . '$3', $originalString);
+        $dateString = preg_replace('@(\D|^)(\d{2}\.\d{2})\.(\D|$)@', '$1$2.' . $thisYear, $originalString);
 
         $dt = new \DateTime($dateString);
 
         if (self::dateToString($this->getNow()) > self::dateToString($dt)) {
-            $dateString = preg_replace('@(\D|^)(\d{2}\.\d{2})\.(\D|$)@', '$1$2.' . (date('Y') + 1) . '$3', $originalString);
+            $dateString = preg_replace('@(\D|^)(\d{2}\.\d{2})\.(\D|$)@', '$1$2.' . ($thisYear + 1) . '$3', $originalString);
         }
 
         return $dateString;

@@ -19,6 +19,9 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 class GoogleFile {
 
+    // @var GoogleFileProxy[] $instance;
+    private static $instance = [];
+
     // @var string $fileCache - Path to where the GoogleFiles will be downloaded.
     private static $fileCache;
 
@@ -38,12 +41,32 @@ class GoogleFile {
     private static $projectPath;
 
     /**
+     * We want to make sure, that we don't accidently work with this class instead of its proxy.
+     * With a protected constructor, there are still ways to create one instance, e.g. by subclassing
+     * in tests.
+     *
      * @param string $fileName
      */
-    public function __construct(string $fileName) {
+    protected function __construct(string $fileName) {
         $this->fileName = $fileName;
         $this->id = $this->getIdByFileName($fileName);
         self::getGoogleClient();
+    }
+
+    /**
+     * Its a kind of proxy design pattern, only that we force the proxy to be used.
+     *
+     * @param string $fileName
+     * @return GoogleFileProx
+     */
+    public static function getInstance(string $fileName): GoogleFileProxy
+    {
+        if (!isset(self::$instance[$fileName])) {
+            $gf = new GoogleFile($fileName);
+            self::$instance[$fileName] = new GoogleFileProxy($fileName, $gf);
+        }
+
+        return self::$instance[$fileName];
     }
 
     /**

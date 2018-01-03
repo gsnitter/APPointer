@@ -6,7 +6,7 @@ namespace SniTodos\Entity;
 use Symfony\Component\Yaml\Yaml;
 
 use SniTodos\Lib\GoogleClient;
-use Symfony\Component\Filesystem\Filesystem;
+use SniTodos\Lib\Filesystem;
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -30,6 +30,12 @@ class GoogleFileProxy {
     {
         $this->setGoogleFile($googleFile ?? new GoogleFile($fileName));
         $this->filePath = GoogleFile::getFileCache() . '/' . $fileName;
+        $this->getFileystem();
+    }
+
+    public function getFilePath()
+    {
+        return $this->filePath;
     }
 
     public function getFileystem()
@@ -72,6 +78,48 @@ class GoogleFileProxy {
             return $content;
         }
 
-        return file_get_contents($this->filePath);
+        return $this->getLocalFileContent();
+    }
+
+    private function getLocalFileContent()
+    {
+        return $this->fs->getContent($this->filePath);
+    }
+
+    public function upload()
+    {
+        if (!$this->fs->exists($this->filePath)) {
+            throw new \Exception("Need to download before uploading {$this->filePath}.");
+        }
+
+        if ($this->googleFile->exists()) {
+            $this->googleFile->updateContent($this->fs->getContent($this->filePath));
+        } else {
+            $this->googleFile->create($this->fs->getContent($this->filePath));
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function parseYaml(): array
+    {
+        return Yaml::parse($this->getContent());
+    }
+
+    public function updateYaml(array $array): GoogleFileProxy
+    {
+        $this->googleFile->updateYaml($array);
+        return $this;
+    }
+
+    public function exists(): bool
+    {
+        return $this->googleFile->exists();
+    }
+
+    public static function getProjectPath(): string
+    {
+        return GoogleFile::getProjectPath();
     }
 }

@@ -5,6 +5,15 @@ namespace SniTodos\tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Google_Service_Drive_DriveFile;
 use SniTodos\Entity\GoogleFile;
+use SniTodos\Entity\GoogleFileProxy;
+
+class PublicGoogleFile extends GoogleFile
+{
+    public function __construct(string $fileName) {
+        parent::__construct($fileName);
+    }
+}
+
 
 class GoogleFileTest extends TestCase
 {
@@ -43,7 +52,7 @@ class GoogleFileTest extends TestCase
 
     public function testGetGoogleClient()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
         $this->assertSame($this->googleClient, $file->getGoogleClient());
     }
 
@@ -63,7 +72,7 @@ class GoogleFileTest extends TestCase
 
     public function testCreate()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
 
         $driveFile = new Google_Service_Drive_DriveFile();
         $driveFile->setId('new_drive_files_id');
@@ -93,7 +102,7 @@ class GoogleFileTest extends TestCase
 
     public function testDelete()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
         $this->googleClient->files
             ->expects($this->once())
             ->method('delete')
@@ -129,7 +138,7 @@ class GoogleFileTest extends TestCase
 
     public function testGetContent()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
 
         $this->googleClient->files
             ->expects($this->once())
@@ -143,7 +152,7 @@ class GoogleFileTest extends TestCase
 
     public function testUpdateContent()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
 
         $this->googleClient->files
             ->expects($this->once())
@@ -155,7 +164,7 @@ class GoogleFileTest extends TestCase
 
     public function testUpdateYaml()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
 
         $this->googleClient->files
             ->expects($spy = $this->once())
@@ -175,7 +184,7 @@ class GoogleFileTest extends TestCase
 
     public function testParseYaml()
     {
-        $file = new GoogleFile('ToDos.yml');
+        $file = new PublicGoogleFile('ToDos.yml');
 
         $content = '{"foo": ["Null", "Eins"]}';
 
@@ -200,10 +209,22 @@ class GoogleFileTest extends TestCase
 
     public function testExists()
     {
-        $file1 = new GoogleFile('ToDos.yml');
+        $file1 = new PublicGoogleFile('ToDos.yml');
         $this->assertTrue($file1->exists());
         
-        $file2 = new GoogleFile('wrong.yml');
+        $file2 = new PublicGoogleFile('wrong.yml');
         $this->assertFalse($file2->exists());
+    }
+
+    public function testGetInstance()
+    {
+        $first  = GoogleFile::getInstance('first.txt');
+        $second = GoogleFile::getInstance('second.txt');
+        $first2 = GoogleFile::getInstance('first.txt');
+
+        $this->assertSame(GoogleFileProxy::Class, get_class($first));
+
+        $this->assertNotSame($first, $second);
+        $this->assertSame($first, $first2);
     }
 }

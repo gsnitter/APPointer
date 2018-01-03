@@ -36,12 +36,16 @@ ADD_HELP
             )
 
             ->addOption('show', 's', InputOption::VALUE_NONE)
+            ->addOption('edit', 'e', InputOption::VALUE_NONE)
             ->addOption('download', 'd', InputOption::VALUE_OPTIONAL, 
 <<<ADD_HELP
 Downloads the google files into the file cache path.
 Defaults only to download todos.yml, can be overridden by passing a list of files
 to download like 'todo.yml, oldTodos.yml'
 ADD_HELP
+            )
+            ->addOption('upload', 'u', InputOption::VALUE_NONE, 
+                'Upload file to GoogleDrive.'
             );
     }
 
@@ -61,7 +65,15 @@ ADD_HELP
 
         if ($input->getOption('show')) {
             $this->showTodos();
-         }
+        }
+
+        if ($input->getOption('edit')) {
+            $this->edit();
+        }
+
+        if ($input->getOption('upload')) {
+            $this->upload();
+        }
     }
 
     private function add(string $todoString)
@@ -88,7 +100,7 @@ ADD_HELP
             return;
         }
 
-        $todoFile = new GoogleFile('todos.yml');
+        $todoFile = GoogleFile::getInstance('todos.yml');
         $oldFileArray = $todoFile->parseYaml($todoFile);
         $normalizer = Normalizer::getInstance();
         $normalizer->normalize($todo);
@@ -106,14 +118,14 @@ ADD_HELP
         $fileNames = preg_split('@(, |,| )@', $filesString);
 
         foreach ($fileNames as $fileName) {
-            $file = new GoogleFile($fileName);
+            $file = GoogleFile::getInstance($fileName);
 
             if (!$file->exists()) {
                 $this->output->writeln("<error>File {$fileName} does not exist on google drive</error>");
                 continue;
             }
 
-            $file->copyToFileCache();
+            $ocntent = $file->getContent();
             $this->output->writeln("<bg=green>File {$fileName} copied to " . GoogleFile::getFileCache() . "</>");
         }
     }
@@ -123,7 +135,7 @@ ADD_HELP
         // TODO SNI: Später am besten den Cache benutzen
         // Dazu ungefähr das benutzen: $lastModified = (new \DateTime())->setTimestamp(filemtime('composer.lock'));
 
-        $todosFile = new GoogleFile('todos.yml');
+        $todosFile = GoogleFile::getInstance('todos.yml');
         $todosArray = $todosFile->parseYaml();
 
         // TODO SNI: Kapseln
@@ -153,7 +165,7 @@ ADD_HELP
         if ($rowCount > 0) {
             $table->render();
         } else {
-            $this->output->writeln("<bg=green>Keine offenen Todos.</>");
+            $this->output->writeln("<bg=green>No unclosed todos.</>");
         }
     }
 
@@ -164,5 +176,22 @@ ADD_HELP
             (new \DateTime($todo->getNormalizedDateString()))->format($todo->hasTime()? 'd.m.Y' : 'd.m.Y H:i:s'),
             $todo->getText(),
         ]);
+    }
+
+    private function edit()
+    {
+        $file = GoogleFile::getInstance('todos.yml');
+        $content = $file->getContent();
+        $path = $file->getFilePath();
+        exec("vim {$path} > `tty`");
+    }
+
+    private function upload()
+    {
+        $file = GoogleFile::getInstance('todos.yml');
+        $content = $file->getContent();
+        $file->upload();
+
+        $this->output->writeln("<bg=green>File uploaded.</>");
     }
 }
