@@ -129,6 +129,11 @@ class GoogleFileProxyTest extends TestCase
             ->method('getContent')
             ->willReturn('Upload for existing file');
 
+        $filesystem
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(true);
+
         $this->googleFile
             ->expects($this->once())
             ->method('exists')
@@ -152,6 +157,11 @@ class GoogleFileProxyTest extends TestCase
             ->expects($this->once())
             ->method('getContent')
             ->willReturn('Upload for existing file');
+
+        $filesystem
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(true);
 
         $this->googleFile
             ->expects($this->once())

@@ -14,7 +14,7 @@ class Fixtures
         $todo = new Todo();
         $todo
             ->setDateString('24.12.')
-            ->setAlarmTime('2d')
+            ->setDisplayTime('2d')
             ;
 
         return $todo;

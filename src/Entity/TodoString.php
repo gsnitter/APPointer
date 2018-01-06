@@ -17,12 +17,12 @@ class TodoString
     {
         // We split on commas, that are not preceded by a backslash.
         $parts = preg_split('@(?<!\\\),\s*@', $this->todoString);
-        list($dateString, $text, $alarmTime) = $parts;
+        list($dateString, $text, $displayTime) = $parts;
 
         $return = [
             'dateString' => $dateString,
             'text' => $text,
-            'alarmTime' => $alarmTime,
+            'displayTime' => $displayTime,
         ];
 
         array_walk($return, function(&$value) {

@@ -4,7 +4,7 @@ namespace SniTodos\Parser;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class AlarmTimeParser {
+class DisplayTimeParser {
 
     private static $mappings = [
         'J' => 'Y', 'JAHRE' => 'Y', 'YEARS' => 'Y', 'Y' => 'Y',
@@ -40,7 +40,7 @@ class AlarmTimeParser {
             $normalizedString = $this->normalize($string);
         } catch (\Exception $e) {
             $context->buildViolation("Unable to parse {$string}")
-                ->atPath('alarmTime')
+                ->atPath('displayTime')
                 ->addViolation();
         }
     }
@@ -88,7 +88,7 @@ class AlarmTimeParser {
         return $parts;
     }
 
-    private function parseIntegers(array &$parts): AlarmTimeParser
+    private function parseIntegers(array &$parts): DisplayTimeParser
     {
         foreach ($parts as $key => &$value) {
             // Every even entry should be an integer 
@@ -106,7 +106,7 @@ class AlarmTimeParser {
         return $this;
     }
 
-    private function translateStrings(array &$parts): AlarmTimeParser
+    private function translateStrings(array &$parts): DisplayTimeParser
     {
         foreach ($parts as $key => &$value) {
             /**

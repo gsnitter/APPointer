@@ -12,7 +12,7 @@ class TodoTest extends TestCase {
     {
         $this->todo = new Todo();
         $this->todo
-            ->setAlarmTime('1 d');
+            ->setDisplayTime('1 d');
         $this->validator = Validation::createValidatorBuilder()
             ->addMethodMapping('loadValidatorMetadata')
             ->getValidator();
@@ -77,7 +77,7 @@ class TodoTest extends TestCase {
         return [
             'dateString' => '31.12.2017',
             'text' => 'Party bei Andi',
-            'alarmTime' => '2d',
+            'displayTime' => '2d',
         ];
     }
 
@@ -86,7 +86,7 @@ class TodoTest extends TestCase {
         $todo = Todo::createFromArray($this->getArrayRepresentation());
         $this->assertSame('31.12.2017', $todo->getDateString());
         $this->assertSame('Party bei Andi', $todo->getText());
-        $this->assertSame('2d', $todo->getAlarmTime());
+        $this->assertSame('2d', $todo->getDisplayTime());
 
         return $todo;
     }
@@ -109,7 +109,7 @@ class TodoTest extends TestCase {
     {
         $this->todo
             ->setNormalizedDateString('31.12.2017 23:59:59')
-            ->setNormalizedAlarmTime('P2D');
+            ->setNormalizedDisplayTime('P2D');
 
         $this->assertTrue( $this->todo->isDue(new \DateTime('31.12.2017 10:00:00')));
         $this->assertFalse($this->todo->isDue(new \DateTime('01.01.2018 00:00:00')));

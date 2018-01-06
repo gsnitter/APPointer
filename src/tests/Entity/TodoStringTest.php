@@ -24,7 +24,7 @@ class TodoStringTest extends TestCase
     {
         $keys = array_keys($this->result);
         sort($keys);
-        $this->assertSame(['alarmTime', 'dateString', 'text'], $keys);
+        $this->assertSame(['dateString', 'displayTime', 'text'], $keys);
     }
 
     public function testToArrayDateString()
@@ -37,8 +37,8 @@ class TodoStringTest extends TestCase
         $this->assertSame('New year party, same procedure as last year', $this->result['text']);
     }
 
-    public function testToArrayAlarmTime()
+    public function testToArrayDisplayTime()
     {
-        $this->assertSame('2d', $this->result['alarmTime']);
+        $this->assertSame('2d', $this->result['displayTime']);
     }
 }

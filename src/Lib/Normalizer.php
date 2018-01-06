@@ -38,7 +38,7 @@ class Normalizer
     {
         return [
             'dateString' => $this->parsers['DateParser'],
-            'alarmTime'  => $this->parsers['AlarmTimeParser'],
+            'displayTime'  => $this->parsers['DisplayTimeParser'],
         ];
     }
 

@@ -3,13 +3,13 @@
 namespace SniTodos\tests\Parser;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Parser\AlarmTimeParser;
+use SniTodos\Parser\DisplayTimeParser;
 
-class AlarmTimeParserTest extends TestCase
+class DisplayTimeParserTest extends TestCase
 {
     public function setUp()
     {
-        $this->parser = new AlarmTimeParser();
+        $this->parser = new DisplayTimeParser();
     }
 
     public function testDateInterval()

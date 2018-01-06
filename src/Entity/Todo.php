@@ -27,14 +27,14 @@ class Todo {
     private $normalizedDateString;
 
     /**
-     * @var string $alarmTime
+     * @var string $displayTime
      */
-    private $alarmTime;
+    private $displayTime;
 
     /**
-     * @var string $normalizedAlarmTime
+     * @var string $normalizedDisplayTime
      */
-    private $normalizedAlarmTime;
+    private $normalizedDisplayTime;
 
     /**
      * @var string text
@@ -110,39 +110,39 @@ class Todo {
     }
 
     /**
-     * @param string $alarmTime
+     * @param string $displayTime
      * @return $this
      */
-    public function setAlarmTime(string $alarmTime): Todo
+    public function setDisplayTime(string $displayTime): Todo
     {
-        $this->alarmTime = $alarmTime;
+        $this->displayTime = $displayTime;
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getAlarmTime(): string
+    public function getDisplayTime(): string
     {
-        return $this->alarmTime;
+        return $this->displayTime;
     }
 
     /**
-     * @param string $alarmTime
+     * @param string $displayTime
      * @return $this
      */
-    public function setNormalizedAlarmTime(string $alarmTime): Todo
+    public function setNormalizedDisplayTime(string $displayTime): Todo
     {
-        $this->normalizedAlarmTime = $alarmTime;
+        $this->normalizedDisplayTime = $displayTime;
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getNormalizedAlarmTime(): string
+    public function getNormalizedDisplayTime(): string
     {
-        return $this->normalizedAlarmTime;
+        return $this->normalizedDisplayTime;
     }
 
     /**
@@ -183,7 +183,7 @@ class Todo {
 
     /**
      * Tests if $dateString is in the future
-     * and $dateString minus $alarmTime is in the past.
+     * and $dateString minus $displayTime is in the past.
      *
      * @param DateTime
      * @return bool
@@ -201,7 +201,7 @@ class Todo {
             return false;
         }
 
-        $time->sub(new \DateInterval($this->getNormalizedAlarmTime()));
+        $time->sub(new \DateInterval($this->getNormalizedDisplayTime()));
 
         // This is tricky: If we say warn me 2 days before Christmas, we expect the warning to be shown
         // on 22.12., 23.12. AND 24.12. Thats why we need to substract another day.

@@ -318,7 +318,7 @@ class GoogleFile {
 // var_dump(GoogleFile::listFileNames());
 
 // $file = new GoogleFile('todos.yml');
-// $file->create("-\n    dateString: '31.12.2017'\n    normalizedDateString: '2017-12-31 23:59:59'\n    text: Party bei Andi\n    alarmTime: 2d\n    normalizedAlarmTime: P2D");
+// $file->create("-\n    dateString: '31.12.2017'\n    normalizedDateString: '2017-12-31 23:59:59'\n    text: Party bei Andi\n    displayTime: 2d\n    normalizedDisplayTime: P2D");
 
 // $file = new GoogleFile('todos.yml');
 // echo $file->getContent() . "\n";
