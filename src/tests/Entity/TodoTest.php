@@ -97,7 +97,7 @@ class TodoTest extends TestCase {
     public function testGetArrayRepresentation(Todo $todo)
     {
         $array = $todo->getArrayRepresentation();
-        $this->assertSame(5, count($array));
+        $this->assertSame(7, count($array));
         $expectedArray = $this->getArrayRepresentation();
 
         foreach ($expectedArray as $key => $value) {

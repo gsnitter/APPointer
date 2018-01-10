@@ -4,7 +4,7 @@ namespace SniTodos\Parser;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class DisplayTimeParser {
+class DisplayTimeParser extends ParserBase {
 
     private static $mappings = [
         'J' => 'Y', 'JAHRE' => 'Y', 'YEARS' => 'Y', 'Y' => 'Y',
@@ -21,7 +21,7 @@ class DisplayTimeParser {
      * @return string
      * @throws \Exception
      */
-    public function normalize(string $string): string
+    public function normalize($string)
     {
         $parts = $this->getParts($string);
         $this->parseIntegers($parts);
@@ -30,7 +30,7 @@ class DisplayTimeParser {
         return $this->getDateIntervalString($parts);
     }
 
-    public function validate(string $string, ExecutionContextInterface $context, $payload)
+    public function validate($string, ExecutionContextInterface $context, $payload)
     {
         if (!$string) {
             return;
@@ -39,7 +39,7 @@ class DisplayTimeParser {
         try {
             $normalizedString = $this->normalize($string);
         } catch (\Exception $e) {
-            $context->buildViolation("Unable to parse {$string}")
+            $context->buildViolation("DisplayTimeParser: Unable to parse {$string}")
                 ->atPath('displayTime')
                 ->addViolation();
         }

@@ -4,6 +4,7 @@ namespace SniTodos\Lib;
 
 use SniTodos\Parser as Parser;
 use SniTodos\Entity\Todo;
+use SniTodos\Parser\ParserBase;
 
 class Normalizer
 {
@@ -38,7 +39,8 @@ class Normalizer
     {
         return [
             'dateString' => $this->parsers['DateParser'],
-            'displayTime'  => $this->parsers['DisplayTimeParser'],
+            'displayTime' => $this->parsers['DisplayTimeParser'],
+            'alarmTimes' => $this->parsers['AlarmTimesParser'],
         ];
     }
 
@@ -70,7 +72,10 @@ class Normalizer
     }
 
     /**
+     * Here we normalize the properties, e.g. for AlarmTimes we do
+     *     $todo->setNormalizedAlarmTimes($alarmTimesParser->normalize($todo->getAlarmTimes()));
      * @param Todo $todo
+     * @return $this
      */
     public function normalize(Todo $todo): Normalizer
     {
@@ -78,7 +83,22 @@ class Normalizer
             $getter = 'get' . ucfirst($property);
             $setter = 'setNormalized' . ucfirst($property);
 
+            $this->passNeededNormalizedDataToParser($todo, $parser);
             $todo->$setter($parser->normalize($todo->$getter()));
+        }
+
+        return $this;
+    }
+
+    private function passNeededNormalizedDataToParser(Todo $todo, ParserBase $parser): Normalizer
+    {
+        $neededs = $parser->getNeededNormalizedValues();
+
+        foreach ($neededs as $needed) {
+            $getter = 'getNormalized' . ucfirst($needed);
+            $setter = preg_replace('@^g@', 's', $getter);
+
+            $parser->$setter($todo->$getter());
         }
 
         return $this;

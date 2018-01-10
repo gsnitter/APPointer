@@ -20,21 +20,40 @@ namespace SniTodos\Entity;
  */
 class DzenMessage
 {
-    const GOOD_NEWS = 0;
-    const BAD_NEWS = 1;
+    const GOOD_NEWS = 1;
+    const NORMAL = 2;
+    const BAD_NEWS = 3;
 
     /** @var string */
     protected $message;
 
     /** @var string */
-    protected $fgColor = "#DDDDDD";
+    protected $fgColor;
 
     /** @var string */
-    protected $bgColor = "#666666";
+    protected $bgColor;
 
     public function __construct(string $message)
     {
         $this->message = $message;
+        $this->setType(DzenMessage::NORMAL);
+    }
+
+    public function stringToType(string $string): int
+    {
+        $string = trim(strtolower($string));
+
+        if (in_array($string, ['good', 'green', 'grün'])) {
+            return self::GOOD_NEWS;
+        }
+        if (in_array($string, ['normal', 'grey', 'grau'])) {
+            return self::NORMAL;
+        }
+        if (in_array($string, ['bad', 'red', 'rot'])) {
+            return self::BAD_NEWS;
+        }
+
+        return 0;
     }
 
     public function setType(int $type): DzenMessage
@@ -45,6 +64,9 @@ class DzenMessage
                 break;
             case self::BAD_NEWS:
                 $this->setTextColor('black')->setBackgroundColor('red');
+                break;
+            case self::NORMAL:
+                $this->setTextColor('#DDDDDD')->setBackgroundColor('#555555');
                 break;
             
             default:
@@ -63,10 +85,16 @@ class DzenMessage
         $command .= "| dzen2 -p -x '500' -y '30' -sa 'c' -ta 'c' -e 'onstart=uncollapse;button1=exit'";
         $command .= " -w '{$this->getBoxWidth()}' -l '{$this->getBoxHeight()}'";
         $command .= " -bg {$this->bgColor} -fg {$this->fgColor}\"";
-        $command .= ' | at "now +1 minutes" 2>&1';
+        $command .= " | at -t '{$this->getAtTimeString($timeString)}' 2>&1";
+        echo $command . "\n";
 
         exec($command, $output, $exitStatus);
         return $exitStatus;
+    }
+
+    private function getAtTimeString(string $timeString): string
+    {
+        return (new \DateTime($timeString))->format('ymdHi');
     }
 
     public function setTextColor(string $fgColor): DzenMessage

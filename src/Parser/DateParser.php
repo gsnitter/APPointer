@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * We want to be able to parse string like the followings
  * '31.12.', '23.08.2016 20:30'
  */
-class DateParser {
+class DateParser extends ParserBase {
 
     /**
      * @var \DateTie $now
@@ -34,7 +34,7 @@ class DateParser {
      * @return string
      * @throws \Exception
      */
-    public function normalize(string $dateString): string
+    public function normalize($dateString)
     {
         $dateString = $this->addTime($dateString);
         $dateString = $this->addYear($dateString);
@@ -62,7 +62,7 @@ class DateParser {
         return $dt->format('Y-m-d H:i:s');
     }
 
-    public function validate(string $dateString = null, ExecutionContextInterface $context, $payload)
+    public function validate($dateString = null, ExecutionContextInterface $context, $payload)
     {
         if (!$dateString) {
             return;
@@ -71,7 +71,7 @@ class DateParser {
         try {
             $normalizedDateString = $this->normalize($dateString);
         } catch (\Exception $e) {
-            $context->buildViolation("Unable to parse {$dateString}")
+            $context->buildViolation("DateParser: Unable to parse {$dateString}")
                 ->atPath('dateString')
                 ->addViolation();
         }

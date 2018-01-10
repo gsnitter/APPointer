@@ -18,6 +18,7 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Validator\Validation;
 use SniTodos\Entity\TodoString;
 use Symfony\Component\Yaml\Yaml;
+use SniTodos\Entity\DzenMessage;
 
 class TodoCommand extends Command
 {
@@ -30,7 +31,7 @@ class TodoCommand extends Command
             ->setDescription('Manage todos')
             ->addOption('add', 'a', INPUTOPTION::VALUE_OPTIONAL,
 <<<ADD_HELP
-Example Usage: execute todo:add '12-24, Weihnachten, 6 days, privat, 1 year'
+Example Usage: execute todo:add '12-24; Weihnachten; 6 days; privat; 1 year'
 Creates a file, and opens it with \$EDITOR.
 ADD_HELP
             )
@@ -43,6 +44,9 @@ Downloads the google files into the file cache path.
 Defaults only to download todos.yml, can be overridden by passing a list of files
 to download like 'todo.yml, oldTodos.yml'
 ADD_HELP
+            )
+            ->addOption('create-at-jobs', 'c', InputOption::VALUE_NONE, 
+                'Create at-jobs as configured in the todo.yml at google drive.'
             )
             ->addOption('upload', 'u', InputOption::VALUE_NONE, 
                 'Upload file to GoogleDrive.'
@@ -73,6 +77,10 @@ ADD_HELP
 
         if ($input->getOption('upload')) {
             $this->upload();
+        }
+
+        if ($input->getOption('create-at-jobs')) {
+            $this->createAtJobs();
         }
     }
 
@@ -193,5 +201,23 @@ ADD_HELP
         $file->upload();
 
         $this->output->writeln("<bg=green>File uploaded.</>");
+    }
+
+    private function createAtJobs()
+    {
+        $todosFile = GoogleFile::getInstance('todos.yml');
+        $todosArray = $todosFile->parseYaml();
+
+        foreach ($todosArray as $todoArray) {
+            $todo = Todo::createFromArray($todoArray);
+            if ($todo->isDueToday()) {
+                foreach ($todo->getNormalizedAlarmTimes() as $alarmTime) {
+                    $message = new DzenMessage($todo->getText());
+                    $message
+                        ->setType($alarmTime['type'])
+                        ->showAt($alarmTime['time']);
+                }
+            }
+        }
     }
 }

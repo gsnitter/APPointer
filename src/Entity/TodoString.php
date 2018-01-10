@@ -16,7 +16,7 @@ class TodoString
     public function toArray(): array
     {
         // We split on commas, that are not preceded by a backslash.
-        $parts = preg_split('@(?<!\\\),\s*@', $this->todoString);
+        $parts = preg_split('@(?<!\\\);\s*@', $this->todoString);
         list($dateString, $text, $displayTime) = $parts;
 
         $return = [
@@ -25,8 +25,12 @@ class TodoString
             'displayTime' => $displayTime,
         ];
 
+        if (isset($parts[3])) {
+            $return['alarmTimes'] = preg_split('@\s*;\s*@', $parts[3]);
+        }
+
         array_walk($return, function(&$value) {
-            $value = str_replace('\\,', ',', $value);
+            $value = str_replace('\\;', ';', $value);
         });
 
         return $return;

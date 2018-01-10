@@ -109,7 +109,8 @@ class GoogleFileProxy {
 
     public function updateYaml(array $array): GoogleFileProxy
     {
-        $this->googleFile->updateYaml($array);
+        $dump = $this->googleFile->updateYaml($array);
+        $this->setContent($dump);
         return $this;
     }
 

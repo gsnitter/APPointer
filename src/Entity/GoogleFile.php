@@ -243,13 +243,13 @@ class GoogleFile {
 
     /**
      * @param array $array
-     * return $this
+     * return $string - $newContent
      */
-    public function updateYaml(array $array): GoogleFile
+    public function updateYaml(array $array): string
     {
         $dump = Yaml::dump($array);
         $this->updateContent($dump, 'text/x-yaml');
-        return $this;
+        return $dump;
     }
 
     /**

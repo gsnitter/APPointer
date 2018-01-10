@@ -37,6 +37,16 @@ class Todo {
     private $normalizedDisplayTime;
 
     /**
+     * @var string|array $alarmTimes
+     */
+    private $alarmTimes;
+
+    /**
+     * @var string $normalizedAlarmTimes
+     */
+    private $normalizedAlarmTimes;
+
+    /**
      * @var string text
      */
     private $text;
@@ -212,8 +222,37 @@ class Todo {
         return ($time->format('Y-m-d H:i:s') < $dt->format('Y-m-d H:i:s'));
     }
 
+    public function isDueToday(): bool
+    {
+        $time = new \DateTime($this->getNormalizedDateString());
+        $result = ($time->format('Y-m-d') == date('Y-m-d'));
+        return ($time->format('Y-m-d') == date('Y-m-d'));
+    }
+
     public function hasTime(): bool
     {
         return (substr($this->getNormalizedDateString(), -8) == '23:59:59');
+    }
+
+    public function getAlarmTimes()
+    {
+        return $this->alarmTimes;
+    }
+
+    public function setAlarmTimes($alarmTimes): Todo
+    {
+        $this->alarmTimes = $alarmTimes;
+        return $this;
+    }
+
+    public function getNormalizedAlarmTimes(): array
+    {
+        return $this->normalizedAlarmTimes;
+    }
+
+    public function setNormalizedAlarmTimes(array $normalizedAlarmTimes): Todo
+    {
+        $this->normalizedAlarmTimes = $normalizedAlarmTimes;
+        return $this;
     }
 }

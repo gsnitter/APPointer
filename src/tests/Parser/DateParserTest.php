@@ -40,4 +40,9 @@ class DateParserTest extends TestCase
     {
         $this->assertSame('2018-01-06 23:59:59', $this->parser->normalize('06.01.'));
     }
+
+    public function testNeedsNormalizedValues()
+    {
+        $this->assertSame([], $this->parser->getNeededNormalizedValues());
+    }
 }

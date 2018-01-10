@@ -10,7 +10,7 @@ class TodoStringTest extends TestCase
     public function setUp()
     {
         $this->string = new TodoString(
-            '31.12., New year party\, same procedure as last year, 2d'
+            '31.12.; New year party\; same procedure as last year; 2d'
         );
         $this->result = $this->string->toArray();
     }
@@ -34,7 +34,7 @@ class TodoStringTest extends TestCase
 
     public function testToArrayText()
     {
-        $this->assertSame('New year party, same procedure as last year', $this->result['text']);
+        $this->assertSame('New year party; same procedure as last year', $this->result['text']);
     }
 
     public function testToArrayDisplayTime()
