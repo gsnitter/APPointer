@@ -1,4 +1,5 @@
 vendor
 credential*.json
+client_id.json
 tags
 .env
