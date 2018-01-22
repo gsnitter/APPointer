@@ -86,6 +86,11 @@ class GoogleFileProxy {
         return $this->fs->getContent($this->filePath);
     }
 
+    public function save()
+    {
+        $this->upload();
+    }
+
     public function upload()
     {
         if (!$this->fs->exists($this->filePath)) {
