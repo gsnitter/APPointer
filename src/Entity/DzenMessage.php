@@ -14,9 +14,13 @@ namespace SniTodos\Entity;
  * Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.
  * In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis mollis pretium.
  * EOT;
- * $message = new DzenMessage($text);
- * $message
- * ->showAt('now +1 minutes');
+ * $message = new DzenMessage($text, (new \DateTime('+1 minutes'))->format('Y-m-d H:i:s'));
+ * $message->setType(DzenMEssage::GOOD_NEWS);
+ * 
+ * require_once(__DIR__ . '/../bootstrap.php');
+ * \SniTodos\Lib\DI::getContainer()
+ *     ->get('SniTodos\Lib\AtJobs\Installer')
+ *     ->install($message);
  */
 class DzenMessage
 {
@@ -28,14 +32,18 @@ class DzenMessage
     protected $message;
 
     /** @var string */
+    protected $atTimeString;
+
+    /** @var string */
     protected $fgColor;
 
     /** @var string */
     protected $bgColor;
 
-    public function __construct(string $message)
+    public function __construct(string $message, string $atTimeString)
     {
         $this->message = $message;
+        $this->atTimeString = $atTimeString;
         $this->setType(DzenMessage::NORMAL);
     }
 
@@ -58,6 +66,8 @@ class DzenMessage
 
     public function setType(int $type): DzenMessage
     {
+        $this->type = $type;
+
         switch ($type) {
             case self::GOOD_NEWS:
                 $this->setTextColor('green')->setBackgroundColor('darkgreen');
@@ -77,24 +87,29 @@ class DzenMessage
         return $this;
     }
 
-    public function showAt(string $timeString): int
+    public function getType(): int
     {
+        return $this->type;
+    }
 
-        $command  = 'echo "export DISPLAY=$DISPLAY;" echo "\'';
+    /**
+     * @return string - The command to install the at-job
+     */
+    public function getInstallCommand(): string
+    {
+        $command  = 'echo "export DISPLAY=$DISPLAY;" echo "\'\n';
         $command .= $this->message . "'";
         $command .= "| dzen2 -p -x '500' -y '30' -sa 'c' -ta 'c' -e 'onstart=uncollapse;button1=exit'";
         $command .= " -w '{$this->getBoxWidth()}' -l '{$this->getBoxHeight()}'";
         $command .= " -bg {$this->bgColor} -fg {$this->fgColor}\"";
-        $command .= " | at -t '{$this->getAtTimeString($timeString)}' 2>&1";
-        echo $command . "\n";
+        $command .= " | at -t '{$this->getNormalizedAtTimeString()}' 2>&1";
 
-        exec($command, $output, $exitStatus);
-        return $exitStatus;
+        return $command;
     }
 
-    private function getAtTimeString(string $timeString): string
+    public function getNormalizedAtTimeString(): string
     {
-        return (new \DateTime($timeString))->format('ymdHi');
+        return (new \DateTime($this->atTimeString))->format('ymdHi');
     }
 
     public function setTextColor(string $fgColor): DzenMessage
@@ -119,16 +134,37 @@ class DzenMessage
             return $lineLength > $max ? $lineLength : $max;
         }, 0);
         // TODO SNI
-        return $maxLineLength * 9;
+        return $maxLineLength * 9 + 10;
     }
 
     private function getBoxHeight(): int
     {
-        return count($this->getLines()) - 1;
+        return count($this->getLines()) + 1;
     }
 
     public function getLines(): array
     {
         return explode("\n", $this->message);
+    }
+
+    /**
+     * Returns a hash, that changes, when the corresponding
+     * at-Command has to be updated
+     */
+    public function getHash(): string
+    {
+        $parts = [
+            $this->getMessage(),
+            $this->getNormalizedAtTimeString(),
+            $this->fgColor,
+            $this->bgColor
+        ];
+
+        return sha1(implode('', $parts));
+    }
+
+    public function getMessage(): string
+    {
+        return $this->message;
     }
 }

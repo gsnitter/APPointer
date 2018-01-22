@@ -225,7 +225,7 @@ class Todo {
     public function isDueToday(): bool
     {
         $time = new \DateTime($this->getNormalizedDateString());
-        $result = ($time->format('Y-m-d') == date('Y-m-d'));
+        // echo "\nVergleiche {$time->format('Y-m-d')} und " . date('Y-m-d') . "\n";
         return ($time->format('Y-m-d') == date('Y-m-d'));
     }
 

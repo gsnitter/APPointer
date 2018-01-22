@@ -19,6 +19,8 @@ use Symfony\Component\Validator\Validation;
 use SniTodos\Entity\TodoString;
 use Symfony\Component\Yaml\Yaml;
 use SniTodos\Entity\DzenMessage;
+use SniTodos\Lib\DI;
+use SniTodos\Lib\AtJobs\AtJobs;
 
 class TodoCommand extends Command
 {
@@ -205,19 +207,6 @@ ADD_HELP
 
     private function createAtJobs()
     {
-        $todosFile = GoogleFile::getInstance('todos.yml');
-        $todosArray = $todosFile->parseYaml();
-
-        foreach ($todosArray as $todoArray) {
-            $todo = Todo::createFromArray($todoArray);
-            if ($todo->isDueToday()) {
-                foreach ($todo->getNormalizedAlarmTimes() as $alarmTime) {
-                    $message = new DzenMessage($todo->getText());
-                    $message
-                        ->setType($alarmTime['type'])
-                        ->showAt($alarmTime['time']);
-                }
-            }
-        }
+        DI::getContainer()->get(AtJobs::class)->create();
     }
 }
