@@ -17,3 +17,5 @@ It is recommended to add the following to the i3-config-file to show the todos o
 
 To see other arguments for the todo-command use
 `/some/path/GoogleClient/execute todo --help`
+
+The packages dzen2 and at should be installed, to make alarm times work.

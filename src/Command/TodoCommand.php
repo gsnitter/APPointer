@@ -33,8 +33,9 @@ class TodoCommand extends Command
             ->setDescription('Manage todos')
             ->addOption('add', 'a', INPUTOPTION::VALUE_OPTIONAL,
 <<<ADD_HELP
-Example Usage: execute todo:add '12-24; Weihnachten; 6 days; privat; 1 year'
-Creates a file, and opens it with \$EDITOR.
+Example Usage: execute todo:add  '23:00; Go to bed; 1 d; 22:50 green/22:55/23:00 red'
+Creates a todo and lists it with todo -s one day before. At 22:50, 22:55 and 23:00
+dzen-messages will pop up in green, grey respectively red.
 ADD_HELP
             )
 
