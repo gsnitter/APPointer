@@ -252,6 +252,14 @@ class GoogleFile {
         return $dump;
     }
 
+    public function appendYaml(array $newContentArray): string
+    {
+        $contentArray = $this->parseYaml();
+        $contentArray = array_merge($contentArray, $newContentArray);
+
+        return $this->updateYaml($contentArray);
+    }
+
     /**
      * We expect yaml-files to always represent arrays.
      *

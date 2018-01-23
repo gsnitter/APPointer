@@ -38,6 +38,6 @@ class TodosHistorizer
         }
 
         $this->todosSaver->save('todos.yml', array_values($todos));
-        $this->todosSaver->save('todos_history.yml', $oldTodos);
+        $this->todosSaver->append('todos_history.yml', $oldTodos);
     }
 }

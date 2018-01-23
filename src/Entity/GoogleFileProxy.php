@@ -114,6 +114,23 @@ class GoogleFileProxy {
 
     public function updateYaml(array $array): GoogleFileProxy
     {
+        if (!$this->exists()) {
+            $this->setContent('');
+            $this->save();
+        }
+
+        $dump = $this->googleFile->updateYaml($array);
+        $this->setContent($dump);
+        return $this;
+    }
+
+    public function appendYaml(array $array): GoogleFileProxy
+    {
+        if (!$this->exists()) {
+            $this->setContent('');
+            $this->save();
+        }
+
         $dump = $this->googleFile->updateYaml($array);
         $this->setContent($dump);
         return $this;

@@ -21,18 +21,22 @@ class TodosHistorizerTest extends TestCase
 
         $todosSaver = $this->getMockBuilder('SniTodos\Lib\TodosSaver')
             ->disableOriginalConstructor()
-            ->setMethods(['save'])
+            ->setMethods(['save', 'append'])
             ->getMock();
         $todosSaver
-            ->expects($spy = $this->exactly(2))
+            ->expects($saveSpy = $this->exactly(1))
             ->method('save')
+            ->willReturn(true);
+        $todosSaver
+            ->expects($appendSpy = $this->exactly(1))
+            ->method('append')
             ->willReturn(true);
 
         TodosHistorizer::setTime(new \DateTime('2018-01-22 23:00:00'));
         $historizer = new TodosHistorizer($todosFileParser, $todosSaver);
         $historizer->historize();
 
-        $params = ($spy->getInvocations()[0])->getParameters();
+        $params = ($saveSpy->getInvocations()[0])->getParameters();
         $this->assertSame(2, count($params));
         list($googleFileName, $todosToSave) = $params;
         $this->assertSame('todos.yml', $googleFileName);
@@ -43,7 +47,7 @@ class TodosHistorizerTest extends TestCase
         $this->assertNotContains('Xmas 17', $texts);
         $this->assertNotContains('New Year\'s Eve 17', $texts);
 
-        $params = ($spy->getInvocations()[1])->getParameters();
+        $params = ($appendSpy->getInvocations()[0])->getParameters();
         $this->assertSame(2, count($params));
         list($googleFileName, $todosToSave) = $params;
         $this->assertSame('todos_history.yml', $googleFileName);
