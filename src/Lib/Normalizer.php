@@ -55,7 +55,7 @@ class Normalizer
     private function createParsers(): array
     {
         $dir = dirname(__DIR__) . '/Parser/';
-        $parserFiles = glob('/home/snitter/Projekte/GoogleClient/src/Parser/*Parser.php');
+        $parserFiles = glob($dir . '*Parser.php');
 
         foreach ($parserFiles as $parserFile) {
             preg_match('@(\w+Parser).php@', $parserFile, $matches);
