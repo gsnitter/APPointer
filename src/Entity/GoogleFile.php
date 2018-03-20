@@ -47,7 +47,7 @@ class GoogleFile {
      *
      * @param string $fileName
      */
-    protected function __construct(string $fileName) {
+    public function __construct(string $fileName) {
         $this->fileName = $fileName;
         $this->id = $this->getIdByFileName($fileName);
         self::getGoogleClient();
@@ -77,6 +77,14 @@ class GoogleFile {
      */
     public static function getIdByFileName(string $fileName)
     {
+        $ids = [
+            "1IYOS5R9KZ0dK49ZMJHCqmbFv1QqYlBxE" => "todos_history.yml",
+            "1uERUVkdXvB6AArpUoXXpiAFB_7wL9bSJ" => "todos.yml",
+        ];
+        if ($id = array_search($fileName, $ids)) {
+            return $id;
+        }
+        // throw new \Exception("ID für file {$fileName} unbekannt");
         return array_search($fileName, self::listFileNames());
     }
 
@@ -110,8 +118,9 @@ class GoogleFile {
     {
         $optParams = array(
             // 'fields' => 'nextPageToken, files(id, name)'
-            // 'parents' => 'appDataFolder',
-            'spaces' => 'appDataFolder',
+            // 'parents' => 'todos',
+            // 'spaces' => 'todos',
+            // 'spaces' => 'appDataFolder',
         );
 
         $results = self::getGoogleClient()->files->listFiles($optParams);
@@ -147,7 +156,7 @@ class GoogleFile {
     {
         $fileMetadata = new Google_Service_Drive_DriveFile([
             'name' => $this->fileName,
-            'parents' => ['appDataFolder'],
+            'parents' => ['todos'],
         ]);
 
         $file = self::$service->files->create($fileMetadata, [
@@ -320,13 +329,27 @@ class GoogleFile {
 
         return $this;
     }
+
+    public static function listFilesOfFolderId($folderId)
+    {
+        $optParams = ['q' => "'{$folderId}' in parents"];
+        $results = self::getGoogleClient()->files->listFiles($optParams);
+
+        $return = [];
+        foreach ($results as $file) {
+            $return[$file->getId()] = $file->getName();
+        }
+
+        return $return;
+    }
 }
 
 // GoogleFile::deleteAllFiles();
 // var_dump(GoogleFile::listFileNames());
+// var_dump(GoogleFile::listFilesOfFolderId('1j3WPjpo2nPekddpi4rWRwC0GhtmdRIrO'));
 
 // $file = new GoogleFile('todos.yml');
-// $file->create("-\n    dateString: '31.12.2017'\n    normalizedDateString: '2017-12-31 23:59:59'\n    text: Party bei Andi\n    displayTime: 2d\n    normalizedDisplayTime: P2D");
+// $file->create("-\n    dateString: '21.03.2018'\n    normalizedDateString: '2018-03-21 23:59:59'\n    text: Mi vorbei\n    displayTime: 2d\n    normalizedDisplayTime: P2D");
 
 // $file = new GoogleFile('todos.yml');
 // echo $file->getContent() . "\n";

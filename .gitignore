@@ -1,6 +1,9 @@
 vendor
 credential*.json
 client_id.json
+service_account*.json
+client_id*.json
 tags
 .env
 data
+coverage

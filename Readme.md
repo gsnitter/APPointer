@@ -8,6 +8,7 @@ TODOs on Gogle-Drive
 ## Description
 
 The project's purpose is mainly to learn how google drive can be used from the CLI.
+I use it for creating quick cross-hardware reminders on the CLI, but I am sure, there are better options out there.
 
 ## Setup
 

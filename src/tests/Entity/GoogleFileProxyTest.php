@@ -35,7 +35,7 @@ class GoogleFileProxyTest extends TestCase
             ->expects($this->once())
             ->method('dumpFile')
             ->with(
-                $this->stringContains('/google-client-file-cache/test.yml'),
+                $this->stringContains('/test.yml'),
                 'Some content'
             );
         $filesystem
@@ -88,7 +88,7 @@ class GoogleFileProxyTest extends TestCase
             ->expects($this->once())
             ->method('dumpFile')
             ->with(
-                $this->stringContains('/google-client-file-cache/test.yml'),
+                $this->stringContains('/test.yml'),
                 'Some other content'
             );
 
@@ -116,7 +116,7 @@ class GoogleFileProxyTest extends TestCase
         $this->assertEquals(1, count($params));
         $this->assertEquals(1, count($params[0]));
 
-        $this->assertRegExp('@.+/google-client-file-cache/test.yml$@', $params[0][0]);
+        $this->assertRegExp('@.+/test.yml$@', $params[0][0]);
     }
 
     public function testUploadForExistingFile()
