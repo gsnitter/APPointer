@@ -204,7 +204,7 @@ class GoogleFileTest extends TestCase
      */
     public function testGetFileCache()
     {
-        $this->assertRegExp('@/.*/google-client-file-cache@', GoogleFile::getFileCache());
+        $this->assertRegExp('@/.*/@', GoogleFile::getFileCache());
     }
 
     public function testExists()

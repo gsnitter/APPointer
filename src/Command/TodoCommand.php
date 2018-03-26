@@ -21,6 +21,7 @@ use Symfony\Component\Yaml\Yaml;
 use SniTodos\Entity\DzenMessage;
 use SniTodos\Lib\DI;
 use SniTodos\Lib\AtJobs\AtJobs;
+use SniTodos\Lib\TodosHistorizer;
 
 class TodoCommand extends Command
 {
@@ -51,6 +52,7 @@ ADD_HELP
             ->addOption('create-at-jobs', 'c', InputOption::VALUE_NONE, 
                 'Create at-jobs as configured in the todo.yml at google drive.'
             )
+            ->addOption('historize', null, InputOption::VALUE_NONE)
             ->addOption('upload', 'u', InputOption::VALUE_NONE, 
                 'Upload file to GoogleDrive.'
             );
@@ -84,6 +86,10 @@ ADD_HELP
 
         if ($input->getOption('create-at-jobs')) {
             $this->createAtJobs();
+        }
+
+        if ($input->getOption('historize')) {
+            $this->historize();
         }
     }
 
@@ -209,5 +215,12 @@ ADD_HELP
     private function createAtJobs()
     {
         DI::getContainer()->get(AtJobs::class)->create();
+    }
+
+    private function historize()
+    {
+        DI::getContainer()
+            ->get(TodosHistorizer::class)
+            ->historize();
     }
 }

@@ -21,7 +21,9 @@ class GoogleClient {
     const BASE_PATH          = __DIR__ . '/../../';
     const CREDENTIALS_PATH   = 'credentials.json';
     const CLIENT_SECRET_PATH = 'client_id.json';
-    const SCOPE              = \Google_Service_Drive::DRIVE_APPDATA;
+    // const SCOPE              = \Google_Service_Drive::DRIVE_APPDATA;
+    // Folgendes gibt natürlich zuviel Rechte, aber es war unklar wie das besser geht.
+    const SCOPE              = \Google_Service_Drive::DRIVE;
 
     private function __construct() {}
 
