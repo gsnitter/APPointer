@@ -1,6 +1,6 @@
 <?php
 
-namespace SniTodos\Lib;
+namespace APPointer\Lib;
 
 require_once __DIR__ . '/../bootstrap.php';
 

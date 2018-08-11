@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\tests\Parser;
+namespace APPointer\tests\Parser;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Parser\DisplayTimeParser;
+use APPointer\Parser\DisplayTimeParser;
 
 class DisplayTimeParserTest extends TestCase
 {
@@ -74,5 +74,11 @@ class DisplayTimeParserTest extends TestCase
         return $time
             ->add(new \DateInterval($normalizedString))
             ->format('Y-m-d H:i:s');
+    }
+
+    public function test2d()
+    {
+        $normalizedString = $this->parser->normalize('2 d');
+        $this->assertSame('P0Y0M2DT0H0M0S', $normalizedString);
     }
 }

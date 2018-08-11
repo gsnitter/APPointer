@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\Lib;
+namespace APPointer\Lib;
 
-use SniTodos\Entity\GoogleFile;
-use SniTodos\Entity\Todo;
+use APPointer\Entity\GoogleFile;
+use APPointer\Entity\Todo;
 
 class TodosSaver
 {

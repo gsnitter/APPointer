@@ -1,10 +1,10 @@
 <?php
 
-namespace SniTodos\tests\Parser;
+namespace APPointer\tests\Parser;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Parser\AlarmTimesParser;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Parser\AlarmTimesParser;
+use APPointer\Entity\DzenMessage;
 
 class AlarmTimesParserTest extends TestCase
 {

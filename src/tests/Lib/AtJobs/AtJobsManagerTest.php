@@ -1,24 +1,24 @@
 <?php
 
-namespace SniTodos\tests\Lib\AtJobs;
+namespace APPointer\tests\Lib\AtJobs;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Lib\AtJobs\AtJobsManager;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Lib\AtJobs\AtJobsManager;
+use APPointer\Entity\DzenMessage;
 
 class AtJobsManagerTest extends TestCase
 {
 
     private function getManager()
     {
-        $fs = $this->createMock('SniTodos\Lib\Filesystem');
+        $fs = $this->createMock('APPointer\Lib\Filesystem');
         $fs->expects($this->getContentSpy = $this->any())
             ->method('getContent')
             ->willReturn('{"hash1":1,"hash2":2}');
         $fs->expects($this->dumpFileSpy = $this->any())
             ->method('dumpFile');
 
-        $installer = $this->getMockBuilder('SniTodos\Lib\AtJobs\Installer')
+        $installer = $this->getMockBuilder('APPointer\Lib\AtJobs\Installer')
             ->disableOriginalConstructor()
             ->setMethods(['install', 'remove', 'getAtIds'])
             ->getMock();

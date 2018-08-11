@@ -1,6 +1,6 @@
 <?php
 
-namespace SniTodos\Parser;
+namespace APPointer\Parser;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 

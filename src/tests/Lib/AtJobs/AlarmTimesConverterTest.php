@@ -1,9 +1,9 @@
 <?php
-namespace SniTodos\tests\Lib\AtJobs;
+namespace APPointer\tests\Lib\AtJobs;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Lib\AtJobs\AlarmTimesConverter;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Lib\AtJobs\AlarmTimesConverter;
+use APPointer\Entity\DzenMessage;
 
 class AlarmTimesConverterTest extends TestCase
 {

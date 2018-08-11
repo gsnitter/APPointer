@@ -1,12 +1,13 @@
 <?php
 
-namespace SniTodos\Entity;
+namespace APPointer\Entity;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use SniTodos\Parser\DateParser;
+use APPointer\Constraints as CustomAssert;
+// use APPointer\Parser\DateParser;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
-use SniTodos\Lib\Normalizer;
+use APPointer\Lib\Normalizer;
 
 /**
  * Gets an array of properties like 'dateString' etc., validates and normalizes them.
@@ -19,12 +20,12 @@ class Todo {
     /**
      * @var string $dateString
      */
-    private $dateString;
+    private $dateString = '';
 
     /**
      * @var string $normalizedDateString
      */
-    private $normalizedDateString;
+    private $normalizedDateString = '';
 
     /**
      * @var string $displayTime
@@ -47,18 +48,51 @@ class Todo {
     private $normalizedAlarmTimes;
 
     /**
+     * @var string $normalizedCreatedAt
+     */
+    private $normalizedCreatedAt;
+
+    /**
      * @var string text
      */
     private $text;
 
+    public function __construct()
+    {
+        $this->normalizedCreatedAt = date('Y-m-d H:i:s');
+        $this->normalizedAlarmTimes = [];
+    }
+
+    public function setNormalizedCreatedAt(string $dateString): Todo
+    {
+        $this->normalizedCreatedAt = $dateString;
+        return $this;
+    }
+
+    public function getNormalizedCreatedAt(): string
+    {
+        return $this->normalizedCreatedAt;
+    }
+
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
-        $metadata->addPropertyConstraint('dateString', new Assert\NotBlank());
-
-        $normalizer = Normalizer::getInstance();
-        foreach($normalizer->getPropertyParsers() as $prop => $parser) {
-            $metadata->addPropertyConstraint($prop, new Assert\Callback([$parser, 'validate']));
-        }
+        $metadata->addPropertyConstraint('dateString', new Assert\NotBlank(['groups' => ['Add', 'Default']]));
+        $constraint1 = new CustomAssert\DateStringNormalizer(['groups' => ['Add']]);
+        $constraint2 = new CustomAssert\DisplayTimeNormalizer(['groups' => ['Add']]);
+        $constraint3 = new CustomAssert\AlarmTimesNormalizer(['groups' => ['Add']]);
+        $constraint1->path = 'dateString';
+        $constraint2->path = 'displayTime';
+        $constraint3->path = 'alarmTimes';
+        // $constraint->addGroup('bla');
+        $metadata->addConstraint($constraint1);
+        $metadata->addConstraint($constraint2);
+        $metadata->addConstraint($constraint3);
+        
+        // TODO SNI: Ggf. recyceln
+        // $normalizer = Normalizer::getInstance();
+        // foreach($normalizer->getPropertyParsers() as $prop => $parser) {
+            // $metadata->addPropertyConstraint($prop, new Assert\Callback([$parser, 'validate']));
+        // }
     }
 
     public static function createFromArray(array $array): Todo
@@ -80,6 +114,7 @@ class Todo {
 
     public function getArrayRepresentation(): array
     {
+        // $this->getCreatedAt();
         return get_object_vars($this);
     }
 

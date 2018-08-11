@@ -1,13 +1,13 @@
 <?php
 
-namespace SniTodos\tests\Lib\AtJobs;
+namespace APPointer\tests\Lib\AtJobs;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Lib\AtJobs\AtJobs;
-use SniTodos\tests\Entity\Fixtures;
-use SniTodos\Entity\Todo;
-use SniTodos\Lib\DI;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Lib\AtJobs\AtJobs;
+use APPointer\tests\Entity\Fixtures;
+use APPointer\Entity\Todo;
+use APPointer\Lib\DI;
+use APPointer\Entity\DzenMessage;
 
 class AtJobsTest extends TestCase
 {
@@ -22,17 +22,17 @@ class AtJobsTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\DependencyInjection\ContainerInterface', $container);
 
         $facade = $container->get(AtJobs::class);
-        $this->assertInstanceOf('SniTodos\Lib\AtJobs\AtJobs', $facade);
+        $this->assertInstanceOf('APPointer\Lib\AtJobs\AtJobs', $facade);
     }
 
     public function testCreate()
     {
-        $todosFileParser = $this->createMock('SniTodos\Lib\TodosFileParser');
+        $todosFileParser = $this->createMock('APPointer\Lib\TodosFileParser');
         $todosFileParser->expects($this->once())
             ->method('getAlarmTimes')
             ->willReturn($this->getAlarmTimes());
 
-        $atJobsManager = $this->getMockBuilder('SniTodos\Lib\AtJobs\AtJobsManager')
+        $atJobsManager = $this->getMockBuilder('APPointer\Lib\AtJobs\AtJobsManager')
             ->disableOriginalConstructor()
             ->setMethods(['getInstalledAtJobs', 'installDzenMessage', 'removeJob', 'cleanup'])
             ->getMock();
@@ -41,7 +41,7 @@ class AtJobsTest extends TestCase
             ->method('getInstalledAtJobs')
             ->willReturn(['hash1' => 5, 'hash2' => 7, '932978e060613f62ca262975a16f6aa0a973b028' => 8]);
 
-        $alarmTimesConverter = $this->getMockBuilder('SniTodos\Lib\AtJobs\AlarmTimesConverter')
+        $alarmTimesConverter = $this->getMockBuilder('APPointer\Lib\AtJobs\AlarmTimesConverter')
             ->setMethods(['createDzenMessages', 'removeJob'])
             ->getMock();
 

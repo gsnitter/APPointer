@@ -1,24 +1,19 @@
 <?php
 
-namespace SniTodos\Parser;
+namespace APPointer\Parser;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * We want to be able to parse string like the followings
- * '31.12.', '23.08.2016 20:30'
+ * '31.12.', '23.08.2016 20:30', 'morgen 3:00 Uhr', 'in 3 Tagen um 12:00'
  */
 class DateParser extends ParserBase {
 
     /**
-     * @var \DateTie $now
+     * @var \$now
      */
     private $now;
-
-    public function __construct()
-    {
-        $this->now = new \DateTime();
-    }
 
     /**
      * @param \DateTime $dt
@@ -36,11 +31,44 @@ class DateParser extends ParserBase {
      */
     public function normalize($dateString)
     {
+        $dateString = $this->translateWords($dateString);
         $dateString = $this->addTime($dateString);
         $dateString = $this->addYear($dateString);
 
         $dateString = (new \DateTime($dateString))->format('Y-m-d H:i:s');
 
+        return $dateString;
+    }
+
+    private function translateWords(string $dateString): string
+    {
+        $dateString = strtolower($dateString);
+        $dateString = str_replace('heute', 'today', $dateString);
+        $dateString = str_replace('morgen', 'tomorrow', $dateString);
+        $dateString = str_replace('in', '', $dateString);
+        $dateString = str_replace('um', '', $dateString);
+        $dateString = str_replace('tagen', 'days', $dateString);
+        $dateString = str_replace('am ', '', $dateString);
+        $dateString = str_replace('nächsten', '', $dateString);
+        $dateString = str_replace('diesen', '', $dateString);
+        $dateString = str_replace('nächster', '', $dateString);
+
+        $weekDays = [
+            'montag' => 'monday',
+            'dienstag' => 'tuesday',
+            'mittwoch' => 'wednesday',
+            'donnerstag' => 'thursday',
+            'freitag' => 'friday',
+            'samstag' => 'saturday',
+            'sonntag' => 'sunday',
+        ];
+
+        foreach ($weekDays as $original => $translation) {
+            $dateString = str_replace($original, $translation, $dateString);
+        }
+
+        // \DateTime('today 13:00') works, but not ('13:00 today')
+        $dateString = preg_replace('@^(.*)\s+(\w+)$@', '\2 \1', $dateString);
         return $dateString;
     }
 
@@ -64,6 +92,8 @@ class DateParser extends ParserBase {
 
     public function validate($dateString = null, ExecutionContextInterface $context, $payload)
     {
+        // TODO SNI
+        var_dump($this->fs);
         if (!$dateString) {
             return;
         }
@@ -88,7 +118,7 @@ class DateParser extends ParserBase {
 
     public function addYear(string $dateString): string
     {
-        $thisYear = intval($this->now->format('Y'));
+        $thisYear = intval($this->getNow()->format('Y'));
         $originalString = $dateString;
         $dateString = preg_replace('@(\D|^)(\d{2}\.\d{2})\.(\D|$)@', '$1$2.' . $thisYear, $originalString);
 

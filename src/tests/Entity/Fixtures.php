@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\tests\Entity;
+namespace APPointer\tests\Entity;
 
-use SniTodos\Entity\Todo;
-use SniTodos\Lib\Normalizer;
+use APPointer\Entity\Todo;
+use APPointer\Lib\Normalizer;
 
 class Fixtures
 {
@@ -44,5 +44,59 @@ class Fixtures
         }
 
         return $todos;
+    }
+
+    public static function getForeignTodoFileContent()
+    {
+        return <<<EOT
+-
+    normalizedCreatedAt: '2018-03-01 10:00:00'
+    normalizedUpdatedAt: '2018-03-01 10:00:00'
+    dateString: '24.03.2018 17:00'
+    normalizedDateString: '2018-03-24 17:00:00'
+    displayTime: 2d
+    normalizedDisplayTime: P0Y0M2DT0H0M0S
+    alarmTimes: null
+    normalizedAlarmTimes: {  }
+    text: 'Erstes Todo'
+-
+    normalizedCreatedAt: '2018-03-01 12:00:00'
+    normalizedUpdatedAt: '2018-03-01 14:00:00'
+    dateString: '24.04.2018 17:00'
+    normalizedDateString: '2018-04-24 17:00:00'
+    displayTime: 2d
+    normalizedDisplayTime: P0Y0M2DT0H0M0S
+    alarmTimes: null
+    normalizedAlarmTimes: [{ time: '2018-04-07 15:30', type: 1 }]
+    text: 'Zweites Todo'
+
+EOT;
+    }
+
+    public static function getLocalTodoFileContent()
+    {
+        return <<<EOT
+-
+    normalizedCreatedAt: '2018-03-01 14:00:00'
+    normalizedUpdatedAt: '2018-03-01 14:00:00'
+    dateString: '24.05.2018 17:00'
+    normalizedDateString: '2018-05-24 17:00:00'
+    displayTime: 2d
+    normalizedDisplayTime: P0Y0M2DT0H0M0S
+    alarmTimes: null
+    normalizedAlarmTimes: {  }
+    text: 'Erstes anderes Todo'
+-
+    normalizedCreatedAt: '2018-03-01 12:00:00'
+    normalizedUpdatedAt: '2018-03-01 12:00:00'
+    dateString: '24.04.2018 18:00'
+    normalizedDateString: '2018-04-24 18:00:00'
+    displayTime: 2d
+    normalizedDisplayTime: P0Y0M2DT0H0M0S
+    alarmTimes: null
+    normalizedAlarmTimes: [{ time: '2018-04-07 15:35', type: 1 }]
+    text: 'Zweites anderes Todo'
+
+EOT;
     }
 }

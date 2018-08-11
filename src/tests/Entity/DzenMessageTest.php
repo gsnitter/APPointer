@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\tests\Entity;
+namespace APPointer\tests\Entity;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Entity\DzenMessage;
 
 class DzenMessageTest extends TestCase
 {

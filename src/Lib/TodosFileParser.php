@@ -1,29 +1,26 @@
 <?php
 
-namespace SniTodos\Lib;
+namespace APPointer\Lib;
 
-use SniTodos\Entity\Todo;
-use SniTodos\Entity\GoogleFile;
-use SniTodos\Entity\GoogleFileProxy;
+use APPointer\Entity\Todo;
+use APPointer\Entity\GoogleFile;
+use APPointer\Entity\GoogleFileProxy;
+use APPointer\Lib\DI;
+use APPointer\Lib\Filesystem;
 
 class TodosFileParser
 {
-    /** @param GoogleFileProxy $file */
-    private $file;
+    /** @var Filesystem */
+    private $fs;
 
-    public function getGoogleFile(): GoogleFileProxy
+    public function __construct(Filesystem $fs)
     {
-        if (!$this->file) {
-            $this->file = GoogleFile::getInstance('todos.yml');
-        }
-
-        return $this->file;
+        $this->fs = $fs;
     }
 
-    public function setGoogleFile(GoogleFileProxy $file): TodosFileParser
+    public function getYaml(): array
     {
-        $this->file = $file;
-        return $this;
+        return $this->fs->loadYaml(DI::getLocalPath());
     }
 
     /**
@@ -31,11 +28,26 @@ class TodosFileParser
      */
     public function getTodos(): array
     {
-        $todoArrays = $this->getGoogleFile()->parseYaml();
-
         return array_map(function($todoArray) {
+            // Should never get into the todos file, but once it did.
+            if ($todoArray['normalizedDisplayTime'] == null) {
+                $error = 'Error: No normlaizedDisplayTime in the record: ' . print_r($todoArray, true);
+                throw new \Exception($error);
+            }
             return Todo::createFromArray($todoArray);
-        }, $todoArrays);
+        }, $this->getYaml());
+    }
+
+    /**
+     * @return Todo[]
+     */
+    public function getDueTodos(): array
+    {
+        $todosArray = $this->getTodos();
+
+        return array_filter($todosArray, function($todo) {
+            return $todo->isDue();
+        });
     }
 
     public function getAlarmTimes(): array

@@ -1,10 +1,10 @@
 <?php
 
-namespace SniTodos\Lib\AtJobs;
-use SniTodos\Lib\DI;
-use SniTodos\Lib\Filesystem;
-use SniTodos\Lib\AtJobs\Installer;
-use SniTodos\Entity\DzenMessage;
+namespace APPointer\Lib\AtJobs;
+use APPointer\Lib\DI;
+use APPointer\Lib\Filesystem;
+use APPointer\Lib\AtJobs\Installer;
+use APPointer\Entity\DzenMessage;
 
 class AtJobsManager
 {

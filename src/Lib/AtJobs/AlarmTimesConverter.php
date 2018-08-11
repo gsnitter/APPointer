@@ -1,8 +1,8 @@
 <?php
 
-namespace SniTodos\Lib\AtJobs;
+namespace APPointer\Lib\AtJobs;
 
-use SniTodos\Entity\DzenMessage;
+use APPointer\Entity\DzenMessage;
 
 class AlarmTimesConverter
 {

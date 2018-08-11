@@ -1,10 +1,10 @@
 <?php
 
-namespace SniTodos;
+namespace APPointer;
 
 use Symfony\Component\Dotenv\Dotenv;
 
-use SniTodos\Lib\DI;
+use APPointer\Lib\DI;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

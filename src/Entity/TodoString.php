@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SniTodos\Entity;
+namespace APPointer\Entity;
 
 /**
  * Splits expressions like
@@ -30,6 +30,14 @@ class TodoString
             'text' => $text,
             'displayTime' => $displayTime,
         ];
+
+        // We need at least 3 parts: Date, Name and some Date Interval telling
+        // when we shall list the todo on app --show.
+        if (count($parts) < 3) {
+            $text  = 'Please provide at least 3 semicolon seperated parts.';
+            $text .= ' See app --help.'; 
+            throw new \InvalidArgumentException($text);
+        }
 
         if (isset($parts[3])) {
             $return['alarmTimes'] = preg_split('@\s*/\s*@', $parts[3]);

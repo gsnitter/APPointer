@@ -1,10 +1,11 @@
 <?php
 
-namespace SniTodos\Lib;
+namespace APPointer\Lib;
 
-use SniTodos\Parser as Parser;
-use SniTodos\Entity\Todo;
+use APPointer\Parser as Parser;
+use APPointer\Entity\Todo;
 use Symfony\Component\Filesystem\Filesystem as BaseFileSystem;
+use Symfony\Component\Yaml\Yaml;
 
 class Filesystem extends BaseFileSystem
 {
@@ -14,5 +15,16 @@ class Filesystem extends BaseFileSystem
     public function getContent(string $path): string
     {
         return file_get_contents($path);
+    }
+
+    public function dumpYaml(string $path, array $array)
+    {
+        $this->dumpFile($path, Yaml::dump($array));
+    }
+
+    public function loadYaml(string $path): array
+    {
+        $content = $this->getContent($path);
+        return $content ?  Yaml::parse($this->getContent($path)) : [];
     }
 }

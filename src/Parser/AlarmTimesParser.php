@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\Parser;
+namespace APPointer\Parser;
 
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use SniTodos\Entity\DzenMessage;
+use APPointer\Entity\DzenMessage;
 
 /**
  * Should accept a single string like '20:00' or '2h' 

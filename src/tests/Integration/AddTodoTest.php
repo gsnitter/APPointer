@@ -1,11 +1,12 @@
 <?php
 
-namespace SniTodos\tests\integration;
+namespace APPointer\tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Entity\TodoString;
-use SniTodos\Entity\Todo;
-use SniTodos\Lib\Normalizer;
+use APPointer\Entity\TodoString;
+use APPointer\Entity\Todo;
+use APPointer\Lib\Normalizer;
+use APPointer\Lib\DI;
 
 class AddTodoTest extends TestCase
 {
@@ -16,8 +17,8 @@ class AddTodoTest extends TestCase
         $todoString = new TodoString($todoString);
         $todoArray = $todoString->toArray($todoString);
         $todo = Todo::createFromArray($todoArray);
-        $normalizer = Normalizer::getInstance();
-        $normalizer->normalize($todo);
+
+        $errors = DI::getValidator()->validate($todo, null, ['Add']);
 
         $alarmTimes = $todo->getNormalizedAlarmTimes();
         $dateString = $this->getDateStringFor('23:00');

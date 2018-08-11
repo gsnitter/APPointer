@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SniTodos\Entity;
+namespace APPointer\Entity;
 
 /**
  * Example Usage:
@@ -18,8 +18,8 @@ namespace SniTodos\Entity;
  * $message->setType(DzenMEssage::GOOD_NEWS);
  * 
  * require_once(__DIR__ . '/../bootstrap.php');
- * \SniTodos\Lib\DI::getContainer()
- *     ->get('SniTodos\Lib\AtJobs\Installer')
+ * \APPointer\Lib\DI::getContainer()
+ *     ->get('APPointer\Lib\AtJobs\Installer')
  *     ->install($message);
  */
 class DzenMessage

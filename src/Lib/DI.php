@@ -1,16 +1,20 @@
 <?php
 
-namespace SniTodos\Lib;
+namespace APPointer\Lib;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Validator\ContainerConstraintValidatorFactory;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class DI
 {
     private static $container;
     private static $projectPath;
+    private static $validator;
 
     public static function getContainer(): ContainerInterface
     {
@@ -26,9 +30,18 @@ class DI
         return self::$container;
     }
 
-    public static function getStoragePath(): string
+    public static function getLocalPath(): string
     {
-        return getenv('STORAGE_PATH')? : self::getProjectPath() . '/data';
+        return getenv('APPOINT_LOCAL_FILE') ? : self::getProjectPath() . '/todos.yml';
+    }
+
+    public static function getHomePath(): string
+    {
+        $path = $_SERVER['HOME'];
+        if (substr($path, 0, 6) == '/home') {
+            throw new \Exception("Home-path {$path} does not start with '/home/'.");
+        }
+        return $path . '/';
     }
 
     public static function getProjectPath(): string
@@ -46,5 +59,23 @@ class DI
         }
 
         return self::$projectPath;
+    }
+
+    public function getStoragePath()
+    {
+        return getenv('STORAGE_DIR') ? : self::getProjectPath() . '/data';
+    }
+
+    public static function getValidator(): ValidatorInterface
+    {
+        if (!self::$validator) {
+            $factory = new ContainerConstraintValidatorFactory(self::getContainer());
+            self::$validator = Validation::createValidatorBuilder()
+                ->setConstraintValidatorFactory($factory)
+                ->addMethodMapping('loadValidatorMetadata')
+                ->getValidator();
+        }
+
+        return self::$validator;
     }
 }

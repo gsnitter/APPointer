@@ -1,8 +1,8 @@
 <?php
 
-namespace SniTodos\tests\Lib;
+namespace APPointer\tests\Lib;
 
-use SniTodos\Lib\Filesystem;
+use APPointer\Lib\Filesystem;
 
 class FilesystemTest extends Filesystem
 {

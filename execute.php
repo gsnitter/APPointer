@@ -1,10 +1,10 @@
 <?php
 
-namespace SniTodos\Command;
+namespace APPointer\Command;
 
 require_once __DIR__ . '/src/bootstrap.php';
 
-use SniTodos\Command\TodoCommand;
+use APPointer\Command\TodoCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();

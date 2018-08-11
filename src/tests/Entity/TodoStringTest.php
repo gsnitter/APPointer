@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\tests\Entity;
+namespace APPointer\tests\Entity;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Entity\TodoString;
+use APPointer\Entity\TodoString;
 
 class TodoStringTest extends TestCase
 {

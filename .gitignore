@@ -6,5 +6,7 @@ client_id*.json
 tags
 .env
 data
-google-client-file-cache/
 coverage
+
+todos.yml
+todos_backup.yml

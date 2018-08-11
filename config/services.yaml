@@ -4,5 +4,16 @@ services:
         autoconfigure: true
         public: true
 
-    SniTodos\Lib\:
+    APPointer\Lib\:
         resource: '../src/Lib/*'
+
+    APPointer\Constraints\:
+        resource: '../src/Constraints/*'
+
+    APPointer\Parser\:
+        resource: '../src/Parser/*'
+
+    APPointer\Constraints\DateStringNormalizerValidator:
+        class: APPointer\Constraints\DateStringNormalizerValidator
+        tags:
+            - { name: 'validator.constraint_validator', alias: 'date.string.normalizer.validator' }

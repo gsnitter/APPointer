@@ -1,9 +1,9 @@
 <?php
 
-namespace SniTodos\Lib\AtJobs;
+namespace APPointer\Lib\AtJobs;
 
-use SniTodos\Entity\Todo;
-use SniTodos\Lib\TodosFileParser;
+use APPointer\Entity\Todo;
+use APPointer\Lib\TodosFileParser;
 
 class AtJobs
 {
@@ -21,9 +21,19 @@ class AtJobs
         $this->alarmTimesConverter = $alarmTimesConverter;
     }
 
-    public function create()
+    public function getFutureAlarmTimes()
     {
         $alarmTimes = $this->todosFileParser->getAlarmTimes();
+
+        return array_filter($alarmTimes, function($alarmTime) {
+            $time = new \DateTime($alarmTime['time']);
+            return $time->format('Y-m-d H:i:s') > date('Y-m-d H:i:s');
+        });
+    }
+
+    public function create()
+    {
+        $alarmTimes = $this->getFutureAlarmTimes();
         $installedAtJobs = $this->atJobsManager->getInstalledAtJobs();
         $dzenMessages = $this->alarmTimesConverter->createDzenMessages($alarmTimes);
 

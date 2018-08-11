@@ -3,9 +3,11 @@
 namespace SniTodos\tests\Lib;
 
 use PHPUnit\Framework\TestCase;
-use SniTodos\Entity\Todo;
-use SniTodos\Lib\TodosFileParser;
-use SniTodos\Lib\DI;
+use APPointer\Entity\Todo;
+use APPointer\Lib\TodosFileParser;
+use APPointer\Lib\DI;
+use APPointer\tests\Lib\FilesystemTest;
+use Symfony\Component\Yaml\Yaml;
 
 class TodosFileParserTest extends TestCase
 {
@@ -14,33 +16,29 @@ class TodosFileParserTest extends TestCase
 
     public function setUp()
     {
-        $this->parser = new TodosFileParser();
+        $yaml = [[
+            'dateString' => '09.01.2018',
+            'normalizedDateString' => '2018-01-09 23:59:59',
+            'displayTime' => '',
+            'normalizedDisplayTime' => 'P0Y0M0DT0H0M0S',
+            'alarmTimes' => ['22:00 red'],
+            'normalizedAlarmTimes' => [['time' =>  '2018-01-09 22:00', 'type' => 3]],
+            'text' => 'Go to bed',
+        ],
+        [
+            'dateString' => '09.01.2018 22:00',
+            'normalizedDateString' => '2017-01-09 22:00:00',
+            'displayTime' => '2d',
+            'normalizedDisplayTime' => 'P0Y0M7DT0H0M0S',
+            'text' => 'Check TodosFileParser',
+            'alarmTimes' => [['time' => '2018-01-09 20:45', 'type' => 1], ['time' => '2018-01-09 20:47', 'type' =>  3]],
+            'normalizedAlarmTimes' => [['time' => '2018-01-09 20:45', 'type' => 1], ['time' => '2018-01-09 20:47', 'type' => 3]],
+        ]];
 
-        $file = $this->getMockBuilder('SniTodos\Entity\GoogleFileProxy')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $fs = new FilesystemTest();
+        $fs->dumpFile(DI::getLocalPath(), Yaml::dump($yaml));
 
-        $file->expects($this->any())
-            ->method('parseYaml')
-            ->willReturn([[
-                'dateString' => '09.01.2018',
-                'normalizedDateString' => '2018-01-09 23:59:59',
-                'displayTime' => '',
-                'normalizedDisplayTime' => 'P0Y0M0DT0H0M0S',
-                'alarmTimes' => ['22:00 red'],
-                'normalizedAlarmTimes' => [['time' =>  '2018-01-09 22:00', 'type' => 3]],
-                'text' => 'Go to bed',
-            ],
-            [
-                'dateString' => '09.01.2018 22:00',
-                'normalizedDateString' => '2017-01-09 22:00:00',
-                'displayTime' => '2d',
-                'normalizedDisplayTime' => 'P0Y0M7DT0H0M0S',
-                'text' => 'Check TodosFileParser',
-                'alarmTimes' => [['time' => '2018-01-09 20:45', 'type' => 1], ['time' => '2018-01-09 20:47', 'type' =>  3]],
-                'normalizedAlarmTimes' => [['time' => '2018-01-09 20:45', 'type' => 1], ['time' => '2018-01-09 20:47', 'type' => 3]],
-            ]]);
-        $this->parser->setGoogleFile($file);
+        $this->parser = new TodosFileParser($fs);
     }
 
     public function testGetTodos()
