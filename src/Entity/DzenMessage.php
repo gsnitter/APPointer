@@ -54,7 +54,7 @@ class DzenMessage
         if (in_array($string, ['good', 'green', 'grün'])) {
             return self::GOOD_NEWS;
         }
-        if (in_array($string, ['normal', 'grey', 'grau'])) {
+        if (in_array($string, ['normal', 'blue', 'blau'])) {
             return self::NORMAL;
         }
         if (in_array($string, ['bad', 'red', 'rot'])) {
@@ -76,7 +76,8 @@ class DzenMessage
                 $this->setTextColor('black')->setBackgroundColor('red');
                 break;
             case self::NORMAL:
-                $this->setTextColor('#DDDDDD')->setBackgroundColor('#555555');
+                # Bläulich
+                $this->setTextColor('#7777ff')->setBackgroundColor('#000088');
                 break;
             
             default:
@@ -94,14 +95,24 @@ class DzenMessage
 
     /**
      * @return string - The command to install the at-job
+     *   -x: Sagt, wo der Hintergrund beginnt
+     *   -y: Verschiebt das etwas nach unten
+     *   -w: width
+     *   -sa: Center a slave window
+     *   -ta: Alignment of top window, c for center
+     *   -p: No timeout, show foever
+     *   -e: event, specified by string, here exit on button1
+     *   -fn: Font.
      */
     public function getInstallCommand(): string
     {
         $command  = 'echo "export DISPLAY=$DISPLAY;" echo "\'\n';
         $command .= $this->message . "'";
-        $command .= "| dzen2 -p -x '500' -y '30' -sa 'c' -ta 'c' -e 'onstart=uncollapse;button1=exit'";
+        $command .= "| dzen2 -p -x '500' -y '30' -ta 'c' -e 'onstart=uncollapse;button1=exit'";
         $command .= " -w '{$this->getBoxWidth()}' -l '{$this->getBoxHeight()}'";
         $command .= " -bg {$this->bgColor} -fg {$this->fgColor}\"";
+        $command .= "  -fn 'Bitstream Vera Sans-15:Bold'";
+
         $command .= " | at -t '{$this->getNormalizedAtTimeString()}' 2>&1";
 
         return $command;

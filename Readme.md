@@ -29,6 +29,6 @@ The project's original purpose was mainly to learn how google drive can be used 
 
 ## Todos
 
-There is no wizard yet for creating appointments, mostly because I have no clue how this should look like.
-Some buttons on the dzen-message-boxes might be nice to tell, if the alarm boxes should be shown again later.
-Also, there is no way to edit appointments yet.
+* There is no wizard yet for creating appointments, mostly because I have no clue how this should look like.
+* Some buttons on the dzen-message-boxes might be nice to tell, if the alarm boxes should be shown again later.
+* Also, there is no way to edit appointments yet.

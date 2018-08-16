@@ -28,7 +28,7 @@ class TodosFileParser
      */
     public function getTodos(): array
     {
-        return array_map(function($todoArray) {
+        $result = array_map(function($todoArray) {
             // Should never get into the todos file, but once it did.
             if ($todoArray['normalizedDisplayTime'] == null) {
                 $error = 'Error: No normlaizedDisplayTime in the record: ' . print_r($todoArray, true);
@@ -36,6 +36,21 @@ class TodosFileParser
             }
             return Todo::createFromArray($todoArray);
         }, $this->getYaml());
+
+        usort($result, function($todo1, $todo2) {
+            return $todo1->getNormalizedDateString() < $todo2->getNormalizedDateString();
+        });
+
+        return $result;
+    }
+
+    public function getAllFutureTodos()
+    {
+        $todos = $this->getTodos();
+
+        return array_filter($todos, function($todo) {
+            return $todo->getNormalizedDateString() > date('Y-m-d H:i:s');
+        });
     }
 
     /**

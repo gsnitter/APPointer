@@ -75,6 +75,7 @@ ADD_HELP
             )
             ->addOption('test', null, InputOption::VALUE_NONE)
             ->addOption('show', 's', InputOption::VALUE_NONE)
+            ->addOption('show-all', null, InputOption::VALUE_NONE)
             ->addOption('umount', null, InputOption::VALUE_NONE)
             ;
     }
@@ -85,7 +86,7 @@ ADD_HELP
         $this->input  = $input;
         $this->container = DI::getContainer();
 
-        $commands = ['download', 'upload', 'add', 'edit', 'test', 'show', 'create-at-jobs', 'umount'];
+        $commands = ['download', 'upload', 'add', 'edit', 'test', 'show', 'show-all', 'create-at-jobs', 'umount'];
         $specialCommands = ['add'];
 
         foreach ($commands as $command) {
@@ -209,6 +210,31 @@ ADD_HELP
         } else {
             $this->output->writeln('<bg=green>No unclosed todos.</>');
         }
+    }
+
+    private function showAll()
+    {
+        $todoArray = $this->container
+            ->get(TodosFileParser::class)
+            ->getAllFutureTodos();
+
+        if ($todoArray) {
+            // TODO SNI: Kapseln
+            $table = new Table($this->output);
+            $table
+                ->setStyle('borderless')
+                ->setHeaders(['Zeit', 'Aufgabe'])
+                ;
+
+            foreach ($todoArray as $todo) {
+                $this->showTodo($todo, $table);
+            }
+
+            $table->render();
+        } else {
+            $this->output->writeln('<bg=green>No unclosed todos.</>');
+        }
+
     }
 
     private function showTodo(Todo $todo, Table $table)
