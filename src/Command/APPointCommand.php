@@ -194,22 +194,7 @@ ADD_HELP
             ->get(TodosFileParser::class)
             ->getDueTodos();
 
-        if ($todoArray) {
-            // TODO SNI: Kapseln
-            $table = new Table($this->output);
-            $table
-                ->setStyle('borderless')
-                ->setHeaders(['Zeit', 'Aufgabe'])
-                ;
-
-            foreach ($todoArray as $todo) {
-                $this->showTodo($todo, $table);
-            }
-
-            $table->render();
-        } else {
-            $this->output->writeln('<bg=green>No unclosed todos.</>');
-        }
+        return $this->showSome($todoArray);
     }
 
     private function showAll()
@@ -218,8 +203,12 @@ ADD_HELP
             ->get(TodosFileParser::class)
             ->getAllFutureTodos();
 
+        return $this->showSome($todoArray);
+    }
+
+    private function showSome(array $todoArray)
+    {
         if ($todoArray) {
-            // TODO SNI: Kapseln
             $table = new Table($this->output);
             $table
                 ->setStyle('borderless')
@@ -234,7 +223,6 @@ ADD_HELP
         } else {
             $this->output->writeln('<bg=green>No unclosed todos.</>');
         }
-
     }
 
     private function showTodo(Todo $todo, Table $table)
