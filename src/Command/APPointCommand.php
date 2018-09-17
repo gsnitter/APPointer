@@ -124,11 +124,6 @@ ADD_HELP
     
     private function upload()
     {
-        $this->output->writeln(
-            '<info>Remote file successfully updated</info>',
-            OutputInterface::VERBOSITY_VERY_VERBOSE
-        );
-
         $this->mountMediaCenterAnd('remerge');
         // Without this, we get no sync with the WebDAV.
         $this->container->get(MediaCenter::class)
