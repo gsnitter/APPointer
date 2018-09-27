@@ -39,7 +39,7 @@ class AtJobsTest extends TestCase
 
         $atJobsManager->expects($this->any())
             ->method('getInstalledAtJobs')
-            ->willReturn(['hash1' => 5, 'hash2' => 7, '932978e060613f62ca262975a16f6aa0a973b028' => 8]);
+            ->willReturn(['hash1' => 5, 'hash2' => 7, '3fbd39f2a32b6c55ceb95b9b1ee05ac5046770b9' => 8]);
 
         $alarmTimesConverter = $this->getMockBuilder('APPointer\Lib\AtJobs\AlarmTimesConverter')
             ->setMethods(['createDzenMessages', 'removeJob'])
