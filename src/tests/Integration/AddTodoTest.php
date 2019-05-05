@@ -7,9 +7,17 @@ use APPointer\Entity\TodoString;
 use APPointer\Entity\Todo;
 use APPointer\Lib\Normalizer;
 use APPointer\Lib\DI;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class AddTodoTest extends TestCase
+class AddTodoTest extends WebTestCase
 {
+    public function setUp()
+    {
+        self::bootKernel();
+        $container = self::$container;
+        $this->validator = $container->get('validator');
+    }
+
     public function testAdd()
     {
         $todoString = '23:00; Zapfenstreich; 1 d; 22:50 grün/22:55/23:00 rot';
@@ -18,7 +26,8 @@ class AddTodoTest extends TestCase
         $todoArray = $todoString->toArray($todoString);
         $todo = Todo::createFromArray($todoArray);
 
-        $errors = DI::getValidator()->validate($todo, null, ['Add']);
+        $errors = $this->validator->validate($todo, null, ['Add']);
+        $this->assertSame(0, count($errors), 'Validierungsfehler: ' . $errors);
 
         $alarmTimes = $todo->getNormalizedAlarmTimes();
         $dateString = $this->getDateStringFor('23:00');

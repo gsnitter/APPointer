@@ -28,20 +28,18 @@ class AlarmTimesNormalizerValidator extends ConstraintValidator
         if (!$value) {
             return;
         }
-        $normalizedDateStringGetter = $constraint->normalizedDateStringGetter;
-        $normalizedDateString = $object->$normalizedDateStringGetter();
+        $dateGetter = $constraint->dateGetter;
+        $date = $object->$dateGetter();
 
-        if (!preg_match('@^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$@', $normalizedDateString)) {
-            $text = "Cannot parse alarm times, since date string {$normalizedDateString} is no date string.";
-
-            $this->context->buildViolation($text)
+        if (is_null($date)) {
+            $this->context->buildViolation("Cannot parse alarm times, since {$dateGetter} gave null")
                 ->atPath($constraint->path)
                 ->addViolation();
             return;
         }
 
         try {
-            $this->parser->setNormalizedDateString($normalizedDateString);
+            $this->parser->setDate($date);
             $normalizedValue = $this->parser->normalize($value);
         } catch (\Exception $e) {
             $normalizedValue = '';

@@ -29,15 +29,17 @@ class DateParser extends ParserBase {
      * @return string
      * @throws \Exception
      */
-    public function normalize($dateString)
+    public function normalize($dateString): ?\DateTime
     {
-        $dateString = $this->translateWords($dateString);
-        $dateString = $this->addTime($dateString);
-        $dateString = $this->addYear($dateString);
+        try {
+            $dateString = $this->translateWords($dateString);
+            $dateString = $this->addTime($dateString);
+            $dateString = $this->addYear($dateString);
 
-        $dateString = (new \DateTime($dateString))->format('Y-m-d H:i:s');
-
-        return $dateString;
+            return new \DateTime($dateString);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     private function translateWords(string $dateString): string

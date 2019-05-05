@@ -1,0 +1,24 @@
+#!/bin/bash
+cd /home/snitter/Projekte/APPointer
+
+echo 'Deleting remote tables..'
+tables=(migration_versions log todo syncronisation)
+
+string='USE xbCUZQurG2;'
+for table in ${tables[@]}; do
+    string=$string" DROP TABLE IF EXISTS $table;"
+done
+
+mysql --login-path=remotemysql -e "$string"
+
+echo ''
+echo 'Deleting old migration files..'
+rm -f src/Migrations/*
+
+echo ''
+echo 'Recreating migration file..'
+bin/console doctrine:migrations:diff --em=remote
+
+echo ''
+echo 'Migrating..'
+bin/console doctrine:migrations:migrate  --em=remote --no-interaction

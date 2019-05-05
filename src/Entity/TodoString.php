@@ -6,7 +6,7 @@ namespace APPointer\Entity;
 /**
  * Splits expressions like
  * '23:00; Zapfenstreich; 1 d; 22:50 grün/22:55/23:00 rot'
- * in arrays with keys dateString, text, displayTime an alarmTimes,
+ * in arrays with keys dateString, text, displayIntervalString an alarmTimes,
  * where the last again is an arra.
  */
 class TodoString
@@ -23,12 +23,12 @@ class TodoString
     {
         // We split on semicolons, that are not preceded by a backslash.
         $parts = preg_split('@(?<!\\\);\s*@', $this->todoString);
-        list($dateString, $text, $displayTime) = $parts;
+        list($dateString, $text, $displayIntervalString) = $parts;
 
         $return = [
             'dateString' => $dateString,
             'text' => $text,
-            'displayTime' => $displayTime,
+            'displayIntervalString' => $displayIntervalString,
         ];
 
         // We need at least 3 parts: Date, Name and some Date Interval telling

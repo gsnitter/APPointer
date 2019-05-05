@@ -25,6 +25,15 @@ The project's original purpose was mainly to learn how google drive can be used 
         /bin/sleep 10 && /bin/su -c "/home/snitter/Projekte/APPointer/execute appoint --download" - snitter
 
     - The packages dzen2 and at should be installed, to make alarm times work.
+    - Still not sure, wether we should use notify-send instead, but than we need this ppa:
+        sudo add-apt-repository ppa:leolik/leolik 
+        sudo apt-get update
+        sudo apt-get upgrade
+        sudo apt-get install libnotify-bin
+        pkill notify-osd
+      In this case, probably a key-mapping like the following is convenient:
+        bindsym $mod+c exec "/home/snitter/Projekte/APPointer/bin/console appoint --hide-alarm-time"
+
     - Use some script (e.g. systemctl) to execute "/home/snitter/Projekte/APPointer/execute app --umount" when shutting down.
 
 ## Todos
@@ -32,3 +41,17 @@ The project's original purpose was mainly to learn how google drive can be used 
 * There is no wizard yet for creating appointments, mostly because I have no clue how this should look like.
 * Some buttons on the dzen-message-boxes might be nice to tell, if the alarm boxes should be shown again later.
 * Also, there is no way to edit appointments yet.
+* Script e.g. called /etc/systemd/user/sni-login.service
+    [Unit]
+    Description=Boottime logger
+
+    [Service]
+    Type=oneshot
+    ExecStart=/home/snitter/Projekte/APPointer/bin/console login --wait --login
+    User=snitter
+
+    [Install]
+    WantedBy=multi-user.target
+* systemctl --user enable sni-login.service
+* If it does not work, create a hard link on /etc/systemd/system
+* systemctl enable sni-login.service

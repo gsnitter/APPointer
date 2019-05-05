@@ -1,8 +1,15 @@
+parameters:
+    locale: 'en'
+
 services:
     _defaults:
         autowire: true
         autoconfigure: true
         public: true
+
+    # Alles folgende ginge wohl mit exclude eleganter, siehe https://symfony.com/doc/current/service_container.html#service-container-services-load-example
+    APPointer\Command\:
+        resource: '../src/Command/*'
 
     APPointer\Lib\:
         resource: '../src/Lib/*'
@@ -17,3 +24,11 @@ services:
         class: APPointer\Constraints\DateStringNormalizerValidator
         tags:
             - { name: 'validator.constraint_validator', alias: 'date.string.normalizer.validator' }
+
+    APPointer\Lib\TodoMerger:
+        arguments: ['@doctrine.orm.entity_manager', '@doctrine.orm.remote_entity_manager']
+
+    APPointer\Listener\PersistLocalAlarmTimesListener:
+        tags:
+            - { name: doctrine.event_listener, event: postPersist }
+            - { name: doctrine.event_listener, event: postUpdate }

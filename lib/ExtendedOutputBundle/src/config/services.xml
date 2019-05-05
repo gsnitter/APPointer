@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Sni\ExtendedOutputBundle\Service\ExtendedOutput">
+            <argument key="$windowRenderer" type="service" id="Sni\ExtendedOutputBundle\Service\WindowRenderer" />
+        </service>
+        <service id="Sni\ExtendedOutputBundle\Service\WindowRenderer">
+            <argument key="$container" type="service" id="Symfony\Component\DependencyInjection\ContainerInterface" />
+            <argument key="$terminal" type="service" id="Sni\ExtendedOutputBundle\Service\Terminal" />
+        </service>
+        <service id="Sni\ExtendedOutputBundle\Service\Terminal">
+        </service>
+        <service id="extended.output.text.projector.wrap" class="Sni\ExtendedOutputBundle\Service\WrapTextProjector" public="true">
+            <argument key="$lineCutter" type="service" id="Sni\ExtendedOutputBundle\Service\LineCutter" />
+        </service>
+        <service id="Sni\ExtendedOutputBundle\Service\LineCutter">
+        </service>
+    </services>
+</container>

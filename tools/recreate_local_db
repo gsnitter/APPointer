@@ -1,0 +1,21 @@
+#!/bin/bash
+cd /home/snitter/Projekte/APPointer
+
+echo 'Deleting database..'
+mysql --login-path=appointer_local -e 'drop database if exists appointer'
+
+echo ''
+echo 'Recreating database..'
+bin/console doctrine:database:create --connection=default
+
+echo ''
+echo 'Deleting old migration files..'
+rm -f src/Migrations/*
+
+echo ''
+echo 'Recreating migration file..'
+bin/console doctrine:migrations:diff --em=default
+
+echo ''
+echo 'Migrating..'
+bin/console doctrine:migrations:migrate  --em=default --no-interaction

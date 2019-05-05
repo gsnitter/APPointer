@@ -4,29 +4,29 @@ namespace APPointer\tests\Entity;
 
 use PHPUnit\Framework\TestCase;
 use APPointer\Entity\Todo;
-use APPointer\Lib\DI;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class TodoTest extends TestCase {
+class TodoTest extends WebTestCase {
 
     public function setUp()
     {
+        self::bootKernel();
+        $container = self::$container;
+        $this->validator = $container->get('validator');
+
         $this->todo = new Todo();
         $this->todo
-            ->setDisplayTime('1 d');
-        $container = DI::getContainer();
-
-        $this->validator = DI::getValidator();
+            ->setDisplayIntervalString('1 d');
     }
 
     public function testGetNormalizedCreatedAt()
     {
-        $firstPart = substr($this->todo->getNormalizedCreatedAt(), 0, 10);
-        $this->assertSame(date('Y-m-d'), $firstPart);
+        $timeString = $this->todo->getCreatedAt()->format('Y-m-d H:i');
+        $this->assertSame(date('Y-m-d H:i'), $timeString);
     }
 
     public function testValidateDateStringEmptyValue()
     {
-        // $errors = $this->validator->validate($this->todo);
         $errors = $this->validator->validate($this->todo);
         $this->assertEquals(1, count($errors));
 
@@ -38,7 +38,6 @@ class TodoTest extends TestCase {
     public function testValidateDateStringStrangeValue()
     {
         $this->todo->setDateString('Some unparsable date string');
-        // $errors = $this->validator->validate($this->todo);
         $errors = $this->validator->validate($this->todo, null, ['Add']);
         $this->assertEquals(1, count($errors));
 
@@ -53,7 +52,7 @@ class TodoTest extends TestCase {
         $errors = $this->validator->validate($this->todo, null, ['Add']);
         $this->assertEquals(0, count($errors));
 
-        $this->assertSame('2017-12-24 12:00:00', $this->todo->getNormalizedDateString());
+        $this->assertSame('2017-12-24 12:00:00', $this->todo->getDate()->format('Y-m-d h:i:s'));
     }
 
 // 
@@ -139,8 +138,8 @@ class TodoTest extends TestCase {
     public function testIsDueNoTimeString()
     {
         $this->todo
-            ->setNormalizedDateString('31.12.2017 23:59:59')
-            ->setNormalizedDisplayTime('P2D');
+            ->setDate(new \DateTime('31.12.2017 23:59:59'))
+            ->setDisplayInterval(new \DateInterval('P2D'));
 
         $this->assertTrue( $this->todo->isDue(new \DateTime('31.12.2017 10:00:00')));
         $this->assertFalse($this->todo->isDue(new \DateTime('01.01.2018 00:00:00')));

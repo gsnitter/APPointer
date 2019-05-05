@@ -24,7 +24,7 @@ class TodoStringTest extends TestCase
     {
         $keys = array_keys($this->result);
         sort($keys);
-        $this->assertSame(['dateString', 'displayTime', 'text'], $keys);
+        $this->assertSame(['dateString', 'displayIntervalString', 'text'], $keys);
     }
 
     public function testToArrayDateString()
@@ -39,6 +39,6 @@ class TodoStringTest extends TestCase
 
     public function testToArrayDisplayTime()
     {
-        $this->assertSame('2d', $this->result['displayTime']);
+        $this->assertSame('2d', $this->result['displayIntervalString']);
     }
 }

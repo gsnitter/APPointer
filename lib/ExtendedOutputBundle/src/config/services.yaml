@@ -1,0 +1,7 @@
+services:
+    # TODO SNI
+    SNI\ExtendedOutputBundle\Lib\ExtendedOutput:
+        arguments:
+            $windowRenderer: 'SNI\ExtendedOutputBundle\Lib\WindowRenderer'
+        class: SNI\ExtendedOutputBundle\Lib\ExtendedOutput
+        public: true

@@ -4,94 +4,125 @@ namespace APPointer\Lib;
 
 use APPointer\Lib\DI;
 use APPointer\Lib\MediaCenter;
-use APPointer\Lib\Filesystem;
+use Doctrine\ORM\EntityManagerInterface;
+use APPointer\RemoteEntity\Syncronisation;
+use APPointer\RemoteEntity\RemoteTodo;
+use APPointer\Entity\Todo;
 
 /**
  * @class TodoMerger
  *
- * Merges two TodoFiles
+ * Updates one todo table with another.
  */
 class TodoMerger {
 
-    /** @var string */
-    private $localPath;
+    /** @var EntityManagerInterface $localEm */
+    private $localEm;
 
-    /** @var string */
-    private $foreignPath;
+    /** @var EntityManagerInterface $remoteEm */
+    private $remoteEm;
 
-    /** @var Filesystem */
-    private $fs;
-
-    /**
-     * If two entries have same normalizedCreatedAt in both files,
-     * we take the one with newer normalizedUpdatedAt.
-     */
-    const CREATED_AT_FIELD='normalizedCreatedAt';
-    const UPDATED_AT_FIELD='normalizedUpdatedAt';
-
-    public function __construct(Filesystem $fs)
+    public function __construct(EntityManagerInterface $localEm, EntityManagerInterface $remoteEm)
     {
-        $this->localPath = DI::getLocalPath();
-        $this->foreignPath = MediaCenter::getDriveLocation() . '/todos.yml';
-        $this->fs = $fs;
+        $this->localEm  = $localEm;
+        $this->remoteEm = $remoteEm;
     }
 
-    public function merge()
+    public function mergeLocalToRemote()
     {
-        $newContent = $this->mergeSourceTarget($this->foreignPath, $this->localPath);
-        $this->fs->dumpYaml($this->localPath, $newContent);
-    }
+        $newSync = Syncronisation::createWithSourceTarget(`hostname`, 'repository');
+        $this->remoteEm->persist($newSync);
 
-    public function remerge()
-    {
-        $newContent = $this->mergeSourceTarget($this->localPath, $this->foreignPath);
-        $this->fs->dumpYaml($this->foreignPath, $newContent);
-    }
+        // TODO SNI: Das Repo irgendwie injecten, damit können wir auch besser Testen 
+        $lastSync = $this->remoteEm->getRepository(Syncronisation::class)
+            ->findOneBy(['source' => trim(`hostname`)], ['time' => 'DESC']);
+        $lastSyncDate = $lastSync ? $lastSync->getTime() : new \DateTime('2000-01-01 00:00:00');
 
-    private function mergeSourceTarget(string $sourcePath, string $targetPath): array
-    {
-        $sourceArray =  $this->useNormalizedCreatedAtAsKey($this->fs->loadYaml($sourcePath));
-        $targetArray =  $this->useNormalizedCreatedAtAsKey($this->fs->loadYaml($targetPath));
+        // TODO SNI: Das auch kapseln in eine Repo-Funktion, schon zum Testen
+        $localTodos = $this->localEm
+            ->createQuery('SELECT t FROM APPointer\Entity\Todo t INDEX BY t.localId WHERE t.globalId is NULL OR t.updatedAt > :lastSyncDate')
+            ->setParameter('lastSyncDate', $lastSyncDate)
+            ->getResult();
 
-        $sourceKeys = array_keys($sourceArray);
-        foreach ($sourceKeys as $key) {
-            if (!isset($targetArray[$key])) {
-                continue;
-            }
+        // TODO SNI: Kapseln in Repo-Funktion, auch zum Testen
+        $newRemoteTodos = [];
+        $oldRemoteTodos = $this->remoteEm
+            ->createQuery('SELECT t FROM APPointer\RemoteEntity\RemoteTodo t INDEX BY t.globalId WHERE t.globalId IN (:globalIds)')
+            ->setParameter('globalIds', array_filter(array_map(function($localTodo) {
+                return $localTodo->getGlobalId();
+            }, $localTodos)))
+            ->getResult();
 
-            if (!isset($targetArray[$key][self::UPDATED_AT_FIELD])) {
-                unset($targetArray[$key]);
+        foreach ($localTodos as $localTodo) {
+            $globId = $localTodo->getGlobalId();
+
+            // If there is a $globId, $oldRemoteTodos[$globId] has to be set.
+            if ($globId && isset($oldRemoteTodos[$globId])) {
+                $oldRemoteTodo = $oldRemoteTodos[$globId];
+                Todo::setArrayValues($oldRemoteTodo, $localTodo->getArrayRepresentation());
+                $oldRemoteTodo
+                    ->setLastSyncTime($newSync->getTime())
+                    ->setLastSyncSource(trim(`hostname`))
+                    ;
             } else {
-                if (isset($sourceArray[$key][self::UPDATED_AT_FIELD])) {
-                    $sourceUpdatedAt = $sourceArray[$key][self::UPDATED_AT_FIELD];
-                    $targetUpdatedAt = $targetArray[$key][self::UPDATED_AT_FIELD];
-                    if ($sourceUpdatedAt > $targetUpdatedAt) {
-                        unset($targetArray[$key]);
-                    }
-                }
+                $newRemoteTodo = RemoteTodo::createFromArray($localTodo->getArrayRepresentation());
+                $this->remoteEm->persist($newRemoteTodo);
+                $newRemoteTodo
+                    ->setLastSyncTime($newSync->getTime())
+                    ->setLastSyncSource(trim(`hostname`))
+                    ;
+                $newRemoteTodos[$localTodo->getLocalId()] = $newRemoteTodo;
             }
         }
 
-        $result = array_merge($sourceArray, $targetArray);
-        ksort($result);
-        return $result;
+        $this->remoteEm->flush();
+
+        // Write global ids to local db
+        foreach ($newRemoteTodos as $localId => $newRemoteTodo) {
+            $localTodos[$localId]->setGlobalId($newRemoteTodo->getGlobalId());
+        }
+        $this->localEm->flush();
     }
 
-    private function useNormalizedCreatedAtAsKey(array $todosArray)
+    public function mergeRemoteToLocal()
     {
-        foreach ($todosArray as &$todoArray) {
-            if (!isset($todoArray[self::CREATED_AT_FIELD])) {
-                $dt = new \DateTime('01.01.2000');
-                $dt
-                    ->add(new \DateInterval(('PT' . rand(0, 100000) . 'S')));
-                $todoArray[self::CREATED_AT_FIELD] = $dt->format('Y-m-d H:i:s');
+        $newSync = Syncronisation::createWithSourceTarget(`hostname`, 'repository');
+        $this->remoteEm->persist($newSync);
+
+        $lastDownload = $this->remoteEm->getRepository(Syncronisation::class)
+            ->findOneBy(['target' => trim(`hostname`)], ['time' => 'DESC']);
+        $lastDownloadTime = $lastDownload ? $lastDownload->getTime() : new \DateTime('2000-01-01 00:00:00');
+
+        $remoteTodos = $this->remoteEm
+            ->createQuery('SELECT r FROM APPointer\RemoteEntity\RemoteTodo r INDEX BY r.globalId
+                WHERE r.lastSyncSource <> :hostname AND r.lastSyncTime > :lastDownloadTime')
+            ->setParameter('hostname', trim(`hostname`))
+            ->setParameter('lastDownloadTime', $lastDownloadTime)
+            ->getResult();
+
+        $newLocalTodos = [];
+        $oldLocalTodos = $this->localEm
+            ->createQuery('SELECT l FROM APPointer\Entity\Todo l INDEX BY l.globalId WHERE l.globalId IN (:globalIds)')
+            ->setParameter('globalIds', array_filter(array_map(function($remoteTodo) {
+                return $remoteTodo->getGlobalId();
+            }, $remoteTodos)))
+            ->getResult();
+
+        foreach ($remoteTodos as $remoteTodo) {
+            $globId = $remoteTodo->getGlobalId();
+
+            // If there is a $globId, $oldRemoteTodos[$globId] has to be set.
+            if ($globId && isset($oldLocalTodos[$globId])) {
+                $oldLocalTodo = $oldLocalTodos[$globId];
+                Todo::setArrayValues($oldLocalTodo, $remoteTodo->getArrayRepresentation());
+            } else {
+                $newLocalTodo = Todo::createFromArray($remoteTodo->getArrayRepresentation());
+                $this->localEm->persist($newLocalTodo);
+                $newLocalTodos[$globId] = $newLocalTodo;
             }
         }
 
-        $keys = array_map(function(&$element) {
-            return $element[self::CREATED_AT_FIELD];
-        }, $todosArray);
-
-        return array_combine($keys, $todosArray);
+        $this->localEm->flush();
+        $this->localEm->flush();
     }
 }

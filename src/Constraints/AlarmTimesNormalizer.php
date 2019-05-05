@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 class AlarmTimesNormalizer extends Constraint
 {
     public $path = 'alarmTimes';
-    public $normalizedDateStringGetter = 'getNormalizedDateString';
+    public $dateGetter = 'getDate';
 
     public function getTargets()
     {

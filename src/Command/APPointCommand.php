@@ -1,7 +1,6 @@
 <?php
 
 namespace APPointer\Command;
-require_once __DIR__ . '/../bootstrap.php';
 
 use APPointer\Entity\GoogleFile;
 
@@ -10,36 +9,34 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-// use Symfony\Component\Console\Helper\Table;
-// use Symfony\Component\Console\Helper\TableCell;
-// use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-// use Symfony\Component\Validator\Validation;
-// use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use APPointer\Lib\MediaCenter;
 use APPointer\Lib\TodoMerger;
 use APPointer\Lib\DI;
 use APPointer\Lib\TodosFileParser;
-use Symfony\Component\Console\Helper\Table;
 use APPointer\Entity\Todo;
 use APPointer\Entity\TodoString;
-use Symfony\Component\Validator\Validation;
 use APPointer\Lib\Normalizer;
-// use APPointer\Entity\TodoString;
-// use APPointer\Lib\Normalizer;
-// use APPointer\Entity\Todo;
-// use APPointer\Entity\DzenMessage;
-// use APPointer\Lib\DI;
-// use APPointer\Lib\AtJobs\AtJobs;
-// use APPointer\Lib\TodosHistorizer;
 use APPointer\Lib\Filesystem;
-use Symfony\Component\DependencyInjection\Container;
 use APPointer\Lib\AtJobs\AtJobs;
+use Sni\ExtendedOutputBundle\Service\ExtendedOutput;
+use Doctrine\Common\Persistence\ObjectRepository;
+use APPointer\Entity\AlarmTime;
 
 class APPointCommand extends Command
 {
     private $output;
     private $container;
+
+    public function __construct(ContainerInterface $container, ExtendedOutput $eOutput)
+    {
+        $this->container = $container;
+        $this->eOutput = $eOutput;
+        parent::__construct();
+    }
 
     protected function configure()
     {
@@ -55,28 +52,21 @@ Example Usages:
 Creates a command to add an appointment.
 ADD_HELP
             )
-            ->addOption('edit', 'e', InputOption::VALUE_NONE)
             ->addOption('download', null, INPUTOPTION::VALUE_NONE,
 <<<ADD_HELP
-Mounts the Google-MediaCenter drive, if it is not mounted yet.
-Downloads the todos.yml if it exists.
-ADD_HELP
-            )
-            ->addOption('create-at-jobs', 'c', INPUTOPTION::VALUE_NONE,
-<<<ADD_HELP
-Insert respectively updates the at jobs already created.
+Updates the local todo table.
 ADD_HELP
             )
             ->addOption('upload', null, INPUTOPTION::VALUE_NONE,
 <<<ADD_HELP
-Mounts the Google-MediaCenter drive, if it is not mounted yet.
-Uploads the changes of the loca todos.yml if it exists.
+Updates the remote todo table.
 ADD_HELP
             )
             ->addOption('test', null, InputOption::VALUE_NONE)
             ->addOption('show', 's', InputOption::VALUE_NONE)
             ->addOption('show-all', null, InputOption::VALUE_NONE)
-            ->addOption('umount', null, InputOption::VALUE_NONE)
+            ->addOption('show-alarm-times', null, InputOption::VALUE_NONE)
+            ->addOption('hide-alarm-time', null, InputOption::VALUE_NONE)
             ;
     }
 
@@ -84,9 +74,8 @@ ADD_HELP
     {
         $this->output = $output;
         $this->input  = $input;
-        $this->container = DI::getContainer();
 
-        $commands = ['download', 'upload', 'add', 'edit', 'test', 'show', 'show-all', 'create-at-jobs', 'umount'];
+        $commands = ['download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'show', 'show-all'];
         $specialCommands = ['add'];
 
         foreach ($commands as $command) {
@@ -104,11 +93,6 @@ ADD_HELP
         }
     }
 
-    private function createAtJobs()
-    {
-        DI::getContainer()->get(AtJobs::class)->create();
-    }
-
     private function executeAdd(InputInterface $input, OutputInterface $output)
     {
         if ($input->hasParameterOption('--add') || $input->hasParameterOption('-a')) {
@@ -119,33 +103,14 @@ ADD_HELP
     // TODO: If error, execute should return an error code.
     private function download()
     {
-        $this->mountMediaCenterAnd('merge');
+        $this->container->get(TodoMerger::class)
+            ->mergeRemoteToLocal();
     }
     
     private function upload()
     {
-        $this->mountMediaCenterAnd('remerge');
-        // Without this, we get no sync with the WebDAV.
-        $this->container->get(MediaCenter::class)
-            ->umount();
-
-        $this->output->writeln(
-            '<info>Remote file successfully updated</info>',
-            OutputInterface::VERBOSITY_VERY_VERBOSE
-        );
-    }
-
-    private function mountMediaCenterAnd(string $action): bool
-    {
-        $mediaCenter = $this->container->get(MediaCenter::class);
-        if ($mediaCenter->mount()) {
-            $merger = $this->container->get(TodoMerger::class);
-            call_user_func([$merger, $action]);
-            return false;
-        } else {
-            $this->output->writeln('<error>Unable to mount GMX drive</error>');
-            return false;
-        }
+        $this->container->get(TodoMerger::class)
+            ->mergeLocalToRemote();
     }
 
     private function displayErrors($errors)
@@ -162,34 +127,33 @@ ADD_HELP
 
         $todo = Todo::createFromArray($todoArray);
 
-        // Das normalisiert gleich
-        $errors = DI::getValidator()->validate($todo, null, ['Add']);
+        // Here we do the normalization
+        $errors = $this->container->get('validator')
+            ->validate($todo, null, ['Add']);
 
         if (count($errors) > 0) {
             $this->displayErrors($errors);
             return;
         }
 
-        // In jedem Fall updaten wir das lokale File
-        $localPath = DI::getLocalPath();
-        $fs = $this->container->get(Filesystem::class);
-        $oldFileArray = $fs->loadYaml($localPath);
-        $oldFileArray[$todo->getNormalizedCreatedAt()] = $todo->getArrayRepresentation();
-        $fs->dumpYaml($localPath, $oldFileArray);
+        $localEm = $this->container->get('doctrine')->getEntityManager('default');
+        $localEm->persist($todo);
+        $localEm->flush();
     }
 
-    private function edit()
+    private function getTodoRepo(string $managerName): ObjectRepository
     {
-        $path = DI::getLocalPath();
-        exec("vim {$path} > `tty`");
+        return $this->container
+            ->get('doctrine')
+            ->getManager($managerName)
+            ->getRepository(Todo::class);
     }
 
     private function show() {
-        $todoArray = $this->container
-            ->get(TodosFileParser::class)
-            ->getDueTodos();
+        $todos = $this->getTodoRepo('default')
+            ->findDueTodos();
 
-        return $this->showSome($todoArray);
+        return $this->showSome($todos);
     }
 
     private function showAll()
@@ -223,37 +187,59 @@ ADD_HELP
     private function showTodo(Todo $todo, Table $table)
     {
         $table->addRow([
-            (new \DateTime($todo->getNormalizedDateString()))->format($todo->hasTime()? 'd.m.Y' : 'd.m.Y H:i:s'),
+            $todo->getDate()->format($todo->hasTime()? 'd.m.Y H:i:s' : 'd.m.Y'),
             $todo->getText(),
         ]);
     }
 
     private function test()
     {
-        $success = $this->container->get(MediaCenter::class)->umount();
-        if ($success) {
-            $this->output->writeln("<info>Successfully mounted</info>");
-        } else {
-            $this->output->writeln("<error>Unable to mount GMX drive</error>");
-        }
-        // echo "\nAll tags:\n";
-        // var_dump($this->container->findTags());
-// 
-        // $tag = 'validator.constraint_validator';
-        // echo "\nServices tagged with {$tag}:\n";
-        // var_dump(DI::getContainer()->findTaggedServiceIds($tag));
-// 
-        // var_dump(DI::getContainer()->get('APPointer\Constraints\DateStringNormalizerValidator'));
+        # $this->output->writeln('Checking ORM');
+        $em = $this->container->get('doctrine')->getEntityManager();
+        $todo = $em->getRepository(Todo::class)->find(1);
+        $todo->setUpdatedAt(new \DateTime());
+        $em->flush();
     }
 
-    private function umount()
+    private function test2()
     {
-        $success = $this->container->get(MediaCenter::class)->umount();
+        // $op = new ExtendedOutput();
+        $output = $this->eOutput;
+        $output->writeln('Some text with a single <info>green</info> word.');
+        $table = new Table($output->getActiveOutput());
+        $table->setHeaders(['One', 'Two'])
+            ->setRows([[1, 2]]);
+        $table->render();
+        $output->writeln("<bg=yellow;options=bold>Some bold text with yellow background\nwith two lines.</>");
 
-        if ($success) {
-            $this->output->writeln('<info>Successfully mounted</info>', OutputInterface::VERBOSITY_VERBOSE);
-        } else {
-            $this->output->writeln('<error>Unable to mount GMX drive</error>', OutputInterface::VERBOSITY_VERBOSE);
+        // TODO SNI
+        $stream = $output->getActiveOutput()->getStream();
+        rewind($stream);
+        $content = fread($stream, 10000);
+
+        $output->renderActiveWindow();
+    }
+
+    private function showAlarmTimes()
+    {
+        $alarmTimes = $this->container->get('doctrine')
+            ->getManager()
+            ->getRepository(AlarmTime::class)
+            ->findBy(['date' => new \DateTime(date('Y-m-d H:i:00'))])
+            ;
+        if ($alarmTimes) {
+            $texte = array_reduce($alarmTimes, function($texte, $alarmTime) {
+                array_push($texte, $alarmTime->getParentTodo()->getText());
+                return $texte;
+            }, []);
+            $text = count($texte) > 1 ? '  - ' . implode("\n  - ", $texte) : array_pop($texte);
+            $command = 'notify-send -t 1200000 "' . date('H:i') . ' Uhr" "'. $text . '"';
+            shell_exec($command);
         }
+    }
+
+    public function hideAlarmTime()
+    {
+        `pkill notify-osd`;
     }
 }

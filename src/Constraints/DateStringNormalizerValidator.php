@@ -4,13 +4,10 @@ namespace APPointer\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-// TODO SNI
-use APPointer\Lib\Filesystem;
 use APPointer\Parser\DateParser;
 
 class DateStringNormalizerValidator extends ConstraintValidator
 {
-    // TODO SNI
     public function __construct(DateParser $parser)
     {
         $this->parser = $parser;
@@ -18,12 +15,12 @@ class DateStringNormalizerValidator extends ConstraintValidator
 
     public function validate($object, Constraint $constraint)
     {
-        // $path = $this->context->getPropertyPath();
-
-        // $text = "Unable to parse date string \"{$value}\" in property \"{$path}\".";
-
         $getter = 'get' . ucfirst($constraint->path);
-        $setter = 'setNormalized' . ucfirst($constraint->path);
+        $setter = 'set' . str_replace('String', '', ucfirst($constraint->path));
+
+        if ($getter === preg_replace('/^s/', 'g', $setter)) {
+            throw new \Exception("Property name {$constraint->path} has to contain 'String'.");
+        }
 
         if (!method_exists($object, $getter)) {
             $this->context->buildViolation("No getter function {$getter} found.")
@@ -36,13 +33,9 @@ class DateStringNormalizerValidator extends ConstraintValidator
             return;
         }
 
-        try {
-            $normalizedDateString = $this->parser->normalize($dateString);
-        } catch (\Exception $e) {
-            $normalizedDateString = '';
-        }
+        $date = $this->parser->normalize($dateString);
 
-        if (!$normalizedDateString) {
+        if (!$date) {
             $text = "The date string \"{$dateString}\" cannot be parsed.";
             $this->context->buildViolation($text)
                 ->atPath($constraint->path)
@@ -53,7 +46,7 @@ class DateStringNormalizerValidator extends ConstraintValidator
                     ->atPath($contraint->path)
                     ->addViolation();
             }
-            $object->$setter($normalizedDateString);
+            $object->$setter($date);
         }
     }
 }

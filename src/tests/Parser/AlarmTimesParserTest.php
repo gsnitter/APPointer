@@ -11,7 +11,7 @@ class AlarmTimesParserTest extends TestCase
     public function setUp()
     {
         $this->parser = new AlarmTimesParser();
-        $this->parser->setNormalizedDateString('2017-01-14 22:00:00');
+        $this->parser->setDate(new \DateTime('2017-01-14 22:00:00'));
     }
 
     public function testNeedsNormalizedValues()

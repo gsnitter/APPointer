@@ -13,8 +13,8 @@ use APPointer\Entity\DzenMessage;
  */
 class AlarmTimesParser extends ParserBase {
 
-    /** @var string normalizedDateString */
-    private $normalizedDateString;
+    /** @var \DateTime $date  */
+    private $date;
 
     public function normalize($alarmTimes)
     {
@@ -38,7 +38,7 @@ class AlarmTimesParser extends ParserBase {
         if (is_string($alarmTime)) {
             $words = preg_split('@\s+@', $alarmTime);
             $type = DzenMessage::NORMAL;
-            $dateString = substr($this->normalizedDateString, 0, 10);
+            $dateString = $this->date->format('Y-m-d');
 
             foreach ($words as $word) {
                 if (preg_match('@^20\d{2}-\d{2}-\d{2}$@', $word)) {
@@ -73,7 +73,7 @@ class AlarmTimesParser extends ParserBase {
         $timeString = trim($alarmTime['time']);
 
         if (!preg_match('@20\d{2}-\d{2}-\d{2}@', $timeString)) {
-            $timeString = substr($this->normalizedDateString, 0, 10) . ' ' . $timeString;
+            $timeString = $this->date->format('Y-m-d') . ' ' . $timeString;
         }
 
         $alarmTime['time'] = $timeString;
@@ -106,9 +106,9 @@ class AlarmTimesParser extends ParserBase {
         return ['dateString'];
     }
 
-    public function setNormalizedDateString(string $normalizedDateString): AlarmTimesParser
+    public function setDate(\DateTime $date): AlarmTimesParser
     {
-        $this->normalizedDateString = $normalizedDateString;
+        $this->date = $date;
         return $this;
     }
 }
