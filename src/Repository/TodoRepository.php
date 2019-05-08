@@ -13,9 +13,8 @@ class TodoRepository extends EntityRepository
         // OR display interval smaller x and now element of [date - x, date],
         // that is: date <= now + x and date >= now
         $qb = $this->createQueryBuilder('t');
-        $nowString = date('Y-m-d H:i:s');
 
-        $query = $qb->select('t')
+        $qb->select('t')
             ->where($qb->expr()->andX(
                 $qb->expr()->gt('t.displayInterval', ':interval'),
                 $qb->expr()->gte('t.date', ':now')
@@ -41,6 +40,17 @@ class TodoRepository extends EntityRepository
             return $todo->isDue();
         });
         return $result;
+    }
+
+    public function findFutureTodos()
+    {
+        $qb = $this->createQueryBuilder('t');
+
+        $qb = $qb->select('t')
+            ->where($qb->expr()->gte('t.date', ':now'))
+            ->setParameter('now', new \DateTime());
+
+        return $qb->getQuery()->getResult();
     }
 }
 

@@ -100,7 +100,6 @@ ADD_HELP
         }
     }
 
-    // TODO: If error, execute should return an error code.
     private function download()
     {
         $this->container->get(TodoMerger::class)
@@ -158,11 +157,10 @@ ADD_HELP
 
     private function showAll()
     {
-        $todoArray = $this->container
-            ->get(TodosFileParser::class)
-            ->getAllFutureTodos();
+        $todos = $this->getTodoRepo('default')
+            ->findFutureTodos();
 
-        return $this->showSome($todoArray);
+        return $this->showSome($todos);
     }
 
     private function showSome(array $todoArray)
@@ -171,7 +169,7 @@ ADD_HELP
             $table = new Table($this->output);
             $table
                 ->setStyle('borderless')
-                ->setHeaders(['Zeit', 'Aufgabe'])
+                ->setHeaders(['ID', 'Zeit', 'Aufgabe'])
                 ;
 
             foreach ($todoArray as $todo) {
@@ -187,6 +185,7 @@ ADD_HELP
     private function showTodo(Todo $todo, Table $table)
     {
         $table->addRow([
+            $todo->getLocalId(),
             $todo->getDate()->format($todo->hasTime()? 'd.m.Y H:i:s' : 'd.m.Y'),
             $todo->getText(),
         ]);
@@ -194,16 +193,6 @@ ADD_HELP
 
     private function test()
     {
-        # $this->output->writeln('Checking ORM');
-        $em = $this->container->get('doctrine')->getEntityManager();
-        $todo = $em->getRepository(Todo::class)->find(1);
-        $todo->setUpdatedAt(new \DateTime());
-        $em->flush();
-    }
-
-    private function test2()
-    {
-        // $op = new ExtendedOutput();
         $output = $this->eOutput;
         $output->writeln('Some text with a single <info>green</info> word.');
         $table = new Table($output->getActiveOutput());
@@ -217,7 +206,9 @@ ADD_HELP
         rewind($stream);
         $content = fread($stream, 10000);
 
-        $output->renderActiveWindow();
+        echo $content;
+
+        // $output->renderActiveWindow();
     }
 
     private function showAlarmTimes()
