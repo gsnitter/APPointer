@@ -44,7 +44,7 @@ class AlarmTimesParser extends ParserBase {
                 if (preg_match('@^20\d{2}-\d{2}-\d{2}$@', $word)) {
                     $dateString = $word;
                 }
-                if (preg_match('@^\d{2}:\d{2}$@', $word, $matches)) {
+                if (preg_match('@^\d{1,2}:\d{2}$@', $word, $matches)) {
                     $timeString = $matches[0];
                 }
                 if ($result = DzenMessage::stringToType($word)) {

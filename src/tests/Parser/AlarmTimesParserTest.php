@@ -1,25 +1,25 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace APPointer\tests\Parser;
 
-use PHPUnit\Framework\TestCase;
-use APPointer\Parser\AlarmTimesParser;
 use APPointer\Entity\DzenMessage;
+use APPointer\Parser\AlarmTimesParser;
+use PHPUnit\Framework\TestCase;
 
 class AlarmTimesParserTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = new AlarmTimesParser();
         $this->parser->setDate(new \DateTime('2017-01-14 22:00:00'));
     }
 
-    public function testNeedsNormalizedValues()
+    public function testNeedsNormalizedValues(): void
     {
         $this->assertSame(['dateString'], $this->parser->getNeededNormalizedValues());
     }
 
-    public function testNormalizeFullArrayNotation()
+    public function testNormalizeFullArrayNotation(): void
     {
         $value = [['time' => '2017-01-13 20:00', 'type' => DzenMessage::NORMAL]];
         $this->assertSame([
@@ -27,7 +27,7 @@ class AlarmTimesParserTest extends TestCase
         ], $this->parser->normalize($value));
     }
 
-    public function testNormalizeArrayWithoutDate()
+    public function testNormalizeArrayWithoutDate(): void
     {
         $value = [['time' => '20:00', 'type' => DzenMessage::GOOD_NEWS]];
         $this->assertSame([
@@ -35,7 +35,7 @@ class AlarmTimesParserTest extends TestCase
         ], $this->parser->normalize($value));
     }
 
-    public function testNormalizeArrayWithoutType()
+    public function testNormalizeArrayWithoutType(): void
     {
         $value = [['time' => '2017-01-13 20:00']];
         $this->assertSame([
@@ -46,7 +46,7 @@ class AlarmTimesParserTest extends TestCase
         $this->assertSame([['time' => '2017-01-13 20:00']], $value);
     }
 
-    public function testNormalizeArrayWithStrings()
+    public function testNormalizeArrayWithStrings(): void
     {
         $value = ['2017-01-13 22:00 green', '2017-01-13 22:05 normal',  '2017-01-13 22:10',  '2017-01-13 22:15 red'];
         $this->assertSame([
@@ -57,7 +57,7 @@ class AlarmTimesParserTest extends TestCase
         ], $this->parser->normalize($value));
     }
 
-    public function testNormalizeArrayWithStringsNoDates()
+    public function testNormalizeArrayWithStringsNoDates(): void
     {
         $value = ['22:00 grün', '22:05',  '22:15 bad'];
         $this->assertSame([
@@ -67,16 +67,16 @@ class AlarmTimesParserTest extends TestCase
         ], $this->parser->normalize($value));
     }
 
-    public function testNormalizeArrayWithStringsNoTime()
+    public function testNormalizeArrayWithStringsNoTime(): void
     {
         $value = ['2017-01-14 green'];
-        $this->expectException(\Exception::class);
+        $this->expectException(\Throwable::class);
         $this->expectExceptionMessage('No parseable time string');
         $this->expectExceptionMessage("'2017-01-14 green'");
         $this->parser->normalize($value);
     }
 
-    public function testNormalizeSingleString()
+    public function testNormalizeSingleString(): void
     {
         $value = '2017-01-14 10:00 rot';
         $result = $this->parser->normalize($value);
@@ -84,6 +84,17 @@ class AlarmTimesParserTest extends TestCase
         $this->assertEquals([[
             'time' => '2017-01-14 10:00',
             'type' => DzenMessage::BAD_NEWS,
+        ]], $result);
+    }
+
+    public function testNormalizeOneDigitTimeString(): void
+    {
+        $value = '9:00';
+        $result = $this->parser->normalize($value);
+
+        $this->assertEquals([[
+            'time' => '2017-01-14 9:00',
+            'type' => DzenMessage::NORMAL,
         ]], $result);
     }
 }
