@@ -29,7 +29,7 @@ class Window
     {
         if (!$viewport) {
             # TODO SNI
-            $viewport = new Viewport(5, 5, 20, 10);
+            $viewport = new Viewport(125, 5, 20, 10);
         }
         $this->viewport = $viewport;
         $this->setBuffer($buffer ? : new Buffer());

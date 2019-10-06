@@ -19,11 +19,13 @@ class WrapTextProjector implements TextProjectorInterface
 
         while ($buffer->getLine($lineNumber) && count($result) <= $viewport->getHeight()) {
             $line = $buffer->getLine($lineNumber);
+
             if ($line === null) {
                 break;
             }
 
-            $textSnippet = $this->lineCutter->getTextSnippet($line, $charOffset, $viewport->getWidth());
+            $debugCalledBefore = count($result);
+            $textSnippet = $this->lineCutter->getTextSnippet($line, $charOffset, $viewport->getWidth(), $debugCalledBefore);
             $result[] = $textSnippet->getText() . str_repeat(' ', $viewport->getWidth() - $textSnippet->getCharCount());
 
             if ($textSnippet->isEol()) {
@@ -35,7 +37,7 @@ class WrapTextProjector implements TextProjectorInterface
         }
 
         while (count($result) < $viewport->getHeight()) {
-            $result[] = str_repeat($viewport->getWidth());
+            $result[] = str_repeat(' ', $viewport->getWidth());
         }
 
         return array_slice($result, 0, $viewport->getHeight());

@@ -30,6 +30,12 @@ class StringPart
         return $this->size;
     }
 
+    // Alias für getSize
+    public function getLength(): int
+    {
+        return $this->size;
+    }
+
     public function getWidth(): int
     {
         return $this->getSize();

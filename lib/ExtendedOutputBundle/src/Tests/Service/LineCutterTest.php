@@ -88,4 +88,11 @@ class LineCutterTest extends TestCase
         $textSnippet = $this->lineCutter->getTextSnippet($line, 20, 20);
         $this->assertRegExp('@^gle .*green.* word\.$@', $textSnippet->getText());
     }
+
+    public function testGetTextSnippetVeryShort()
+    {
+        $line = 'with two lines.';
+        $textSnippet = $this->lineCutter->getTextSnippet($line, 0, 20);
+        $this->assertSame('with two lines.', $textSnippet->getText());
+    }
 }

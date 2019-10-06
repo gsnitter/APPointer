@@ -20,6 +20,9 @@ class LoginCommand extends Command
     /** @var string $dbName */
     private $dbName;
 
+    /** @var InputInterface $input */
+    private $input;
+
     public function __construct(ManagerRegistry $doctrine)
     {
         $this->em = $doctrine->getManager('remote');

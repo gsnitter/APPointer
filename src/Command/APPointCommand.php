@@ -19,16 +19,15 @@ use APPointer\Lib\DI;
 use APPointer\Lib\TodosFileParser;
 use APPointer\Entity\Todo;
 use APPointer\Entity\TodoString;
-use APPointer\Lib\Normalizer;
-use APPointer\Lib\Filesystem;
-use APPointer\Lib\AtJobs\AtJobs;
 use Sni\ExtendedOutputBundle\Service\ExtendedOutput;
 use Doctrine\Common\Persistence\ObjectRepository;
 use APPointer\Entity\AlarmTime;
 
 class APPointCommand extends Command
 {
+    /** @var OutputInterface $output */
     private $output;
+    /** @var ContainerInterface $container */
     private $container;
 
     public function __construct(ContainerInterface $container, ExtendedOutput $eOutput)
@@ -62,7 +61,7 @@ ADD_HELP
 Updates the remote todo table.
 ADD_HELP
             )
-            ->addOption('test', null, InputOption::VALUE_NONE)
+            ->addOption('test', 't', InputOption::VALUE_NONE)
             ->addOption('show', 's', InputOption::VALUE_NONE)
             ->addOption('show-all', null, InputOption::VALUE_NONE)
             ->addOption('show-alarm-times', null, InputOption::VALUE_NONE)
@@ -199,7 +198,7 @@ ADD_HELP
     private function test()
     {
         $output = $this->eOutput;
-        $output->writeln('Some text with a single <info>green</info> word.');
+        $output->writeln('Some text with nonbold/<options=bold>bold</> and a single <info>green</info> word.');
         $table = new Table($output->getActiveOutput());
         $table->setHeaders(['One', 'Two'])
             ->setRows([[1, 2]]);
@@ -207,13 +206,13 @@ ADD_HELP
         $output->writeln("<bg=yellow;options=bold>Some bold text with yellow background\nwith two lines.</>");
 
         // TODO SNI
-        $stream = $output->getActiveOutput()->getStream();
-        rewind($stream);
-        $content = fread($stream, 10000);
+        // $stream = $output->getActiveOutput()->getStream();
+        // rewind($stream);
+        // $content = fread($stream, 10000);
 
-        echo $content;
+        // echo $content;
 
-        // $output->renderActiveWindow();
+        $output->renderActiveWindow();
     }
 
     private function showAlarmTimes()
@@ -224,7 +223,7 @@ ADD_HELP
             ->findBy(['date' => new \DateTime(date('Y-m-d H:i:00'))])
             ;
         if ($alarmTimes) {
-            $texte = array_reduce($alarmTimes, function($texte, $alarmTime) {
+            $texte = array_reduce($alarmTimes, function($texte, AlarmTime $alarmTime) {
                 array_push($texte, $alarmTime->getParentTodo()->getText());
                 return $texte;
             }, []);
