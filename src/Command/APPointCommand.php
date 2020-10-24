@@ -184,9 +184,14 @@ ADD_HELP
 
     private function showTodo(Todo $todo, Table $table)
     {
+        $time = $todo->getDate()->format($todo->hasTime()? 'd.m.Y H:i:s' : 'd.m.Y');
+        $daysToGo = date_diff(new \DateTime('today'), $todo->getDate())->days;
+        if ($daysToGo > 1) {
+            $time .= " (in {$daysToGo} Tagen)";
+        }
         $table->addRow([
             $todo->getLocalId(),
-            $todo->getDate()->format($todo->hasTime()? 'd.m.Y H:i:s' : 'd.m.Y'),
+            $time,
             $todo->getText(),
         ]);
     }

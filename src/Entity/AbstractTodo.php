@@ -219,7 +219,7 @@ class AbstractTodo
 
     public function hasTime(): bool
     {
-        return ($this->getDate()->format('H:i;s') !== '23:59:59');
+        return ($this->getDate()->format('H:i:s') !== '23:59:59');
     }
 
     public function getNormalizedAlarmTimes(): array
