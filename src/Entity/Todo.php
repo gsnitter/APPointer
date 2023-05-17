@@ -2,13 +2,15 @@
 
 namespace APPointer\Entity;
 
+// use APPointer\Parser\DateParser;
+use APPointer\Constraints as CustomAssert;
+use APPointer\Lib\Normalizer;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use APPointer\Constraints as CustomAssert;
-// use APPointer\Parser\DateParser;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
-use APPointer\Lib\Normalizer;
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Gets an array of properties like 'dateString' etc., validates and normalizes them.
@@ -32,6 +34,7 @@ class Todo extends AbstractTodo
 
     /**
      * @var string $dateString
+     * @ORM\Column(type="text", length=255, nullable=false)
      */
     private $dateString = '';
 
@@ -44,6 +47,18 @@ class Todo extends AbstractTodo
      * @var string|array $alarmTimes
      */
     private $alarmTimes;
+
+    /**
+     * @var Collection $alarmTimeEntities
+     * @ORM\OneToMany(targetEntity="AlarmTime", mappedBy="parentTodo")
+     */
+    private $alarmTimeEntities;
+
+    public function __construct()
+    {
+        $this->alarmTimeEntities = new ArrayCollection();
+        parent::__construct();
+    }
 
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
@@ -113,7 +128,7 @@ class Todo extends AbstractTodo
      */
     public function getDisplayIntervalString(): string
     {
-        return $this->displayIntervalString;
+        return (string) $this->displayIntervalString;
     }
 
     public function getAlarmTimes()
@@ -125,5 +140,10 @@ class Todo extends AbstractTodo
     {
         $this->alarmTimes = $alarmTimes;
         return $this;
+    }
+
+    public function getAlarmTimeEntities(): Collection
+    {
+        return $this->alarmTimeEntities;
     }
 }

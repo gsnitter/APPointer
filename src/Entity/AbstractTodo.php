@@ -64,10 +64,17 @@ class AbstractTodo
      */
     protected $text;
 
+    /**
+     * @var bool repeatable
+     * @ORM\Column(type="boolean", options={"default":"0"})
+     */
+    protected $repeatable;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->updatedAt = $this->createdAt;
+        $this->repeatable = false;
 
         $this->normalizedAlarmTimes = [];
     }
@@ -256,5 +263,16 @@ class AbstractTodo
     {
         $this->normalizedAlarmTimes = $normalizedAlarmTimes;
         return $this;
+    }
+
+    public function setRepeatable(bool $repeatable): self
+    {
+        $this->repeatable = $repeatable;
+        return $this;
+    }
+
+    public function isRepeatable(): bool
+    {
+        return $this->repeatable;
     }
 }

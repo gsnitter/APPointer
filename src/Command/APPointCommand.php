@@ -20,15 +20,16 @@ use APPointer\Lib\DI;
 use APPointer\Lib\TodosFileParser;
 use APPointer\Entity\Todo;
 use APPointer\Entity\TodoString;
+use APPointer\Lib\Normalizer;
+use APPointer\Lib\Filesystem;
+use APPointer\Lib\AtJobs\AtJobs;
 use Sni\ExtendedOutputBundle\Service\ExtendedOutput;
 use Doctrine\Common\Persistence\ObjectRepository;
 use APPointer\Entity\AlarmTime;
 
 class APPointCommand extends Command
 {
-    /** @var OutputInterface $output */
     private $output;
-    /** @var ContainerInterface $container */
     private $container;
 
     public function __construct(ContainerInterface $container, ExtendedOutput $eOutput)
@@ -63,10 +64,10 @@ ADD_HELP
 Updates the remote todo table.
 ADD_HELP
             )
-            ->addOption('test', 't', InputOption::VALUE_NONE)
-            ->addOption('test2', null, InputOption::VALUE_NONE)
-            ->addOption('show', 's', InputOption::VALUE_NONE)
-            ->addOption('show-all', null, InputOption::VALUE_NONE)
+            ->addOption('test', null, InputOption::VALUE_NONE)
+            ->addOption('list', 'l', InputOption::VALUE_NONE)
+            ->addOption('list-all', null, InputOption::VALUE_NONE)
+            ->addOption('schedule-todays-alarmtimes', 's', InputOption::VALUE_NONE)
             ->addOption('show-alarm-times', null, InputOption::VALUE_NONE)
             ->addOption('hide-alarm-time', null, InputOption::VALUE_NONE)
             ;
@@ -77,7 +78,7 @@ ADD_HELP
         $this->output = $output;
         $this->input  = $input;
 
-        $commands = ['download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'test2', 'show', 'show-all'];
+        $commands = ['download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'list', 'list-all', 'schedule-todays-alarmtimes'];
         $specialCommands = ['add'];
 
         foreach ($commands as $command) {
@@ -137,7 +138,7 @@ ADD_HELP
             return;
         }
 
-        $localEm = $this->container->get('doctrine')->getEntityManager('default');
+        $localEm = $this->container->get('doctrine')->getManager('default');
         $localEm->persist($todo);
         $localEm->flush();
     }
@@ -150,16 +151,15 @@ ADD_HELP
             ->getRepository(Todo::class);
     }
 
-    private function show() {
+    private function list() {
         $this->container->get(CronHandler::class)->resetDateStrings();
-
         $todos = $this->getTodoRepo('default')
             ->findDueTodos();
 
         return $this->showSome($todos);
     }
 
-    private function showAll()
+    private function listAll()
     {
         $this->container->get(CronHandler::class)->resetDateStrings();
 
@@ -205,7 +205,7 @@ ADD_HELP
     private function test()
     {
         $output = $this->eOutput;
-        $output->writeln('Some text with nonbold/<options=bold>bold</> and a single <info>green</info> word.');
+        $output->writeln('Some text with a single <info>green</info> word.');
         $table = new Table($output->getActiveOutput());
         $table->setHeaders(['One', 'Two'])
             ->setRows([[1, 2]]);
@@ -253,5 +253,27 @@ ADD_HELP
     public function hideAlarmTime()
     {
         `pkill notify-osd`;
+    }
+
+    private function scheduleTodaysAlarmtimes(): void
+    {
+        $em = $this->container->get('doctrine')->getManager();
+        $todos = $em->getRepository(Todo::class)
+            ->findBy(['repeatable' => true])
+            ;
+
+        // Recalculates alarmTimes using dateString
+        foreach ($todos as $todo) {
+            $this->container->get('validator')->validate($todo, null, ['Add']);
+        }
+
+        foreach ($todos as $todo) {
+            foreach ($todo->getAlarmTimeEntities() as $alarmTime) {
+                // Via listener, this also removes its at-job, if it exists.
+                $em->remove($alarmTime);
+            }
+        }
+
+        $em->flush();
     }
 }

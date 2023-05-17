@@ -22,3 +22,6 @@ We use notify-send, so alarm times should be shown on every decent system. To ma
     `sudo add-apt-repository ppa:leolik/leolik`
 Together with i3, we recommend
     `bindsym $mod+c exec "/home/snitter/Projekte/APPointer/bin/console appoint --hide-alarm-time`
+
+## AT
+E.g. echo 'echo "Go home" > ~/.popup_messages/geh' | at 06:50 pm

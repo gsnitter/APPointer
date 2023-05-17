@@ -9,8 +9,14 @@
         "symfony/config": "^4",
         "symfony/flex": "^1.1",
         "symfony/framework-bundle": "^4.1",
+        "composer/package-versions-deprecated": "1.11.99.4",
+        "doctrine/common": "^2",
+        "doctrine/doctrine-bundle": "^2",
+        "doctrine/doctrine-migrations-bundle": "^2",
+        "doctrine/orm": "^2",
+        "doctrine/doctrine-cache-bundle": "^1.4",
+        "symfony/translation": "^4.1",
         "symfony/orm-pack": "^1.0",
-        "mtdowling/cron-expression": "^1.2"
     },
     "autoload": {
         "psr-4": {

@@ -2,12 +2,6 @@
 
 namespace APPointer\Entity;
 
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
-use APPointer\Constraints as CustomAssert;
-// use APPointer\Parser\DateParser;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
-use APPointer\Lib\Normalizer;
 use Doctrine\ORM\Mapping as ORM;
 use APPointer\Lib\DI;
 
@@ -36,7 +30,7 @@ class AlarmTime
 
     /**
      * @var Todo $parentTodo
-     * @ORM\ManyToOne(targetEntity="Todo")
+     * @ORM\ManyToOne(targetEntity="Todo", inversedBy="alarmTimeEntities")
      * @ORM\JoinColumn(name="todo_id", referencedColumnName="local_id")
      */
     protected $parentTodo;
@@ -95,12 +89,27 @@ class AlarmTime
 
     /**
      * Initalizes an at-Job for the given date.
-     * Returns the new at job.
+     * Returns the new at job id or null if not successfull.
      */
-    public function init(): int
+    public function init(): ?int
     {
         $command = 'php ' . DI::getProjectPath() . '/bin/console appoint --show-alarm-times';
         $dateString = $this->getDateString();
-        return intval(shell_exec("echo '{$command }' | at '{$dateString}'"));
+
+        // Anscheinend schreibt at alles nach stderr, deshalb dieser Umweg:
+        $result = shell_exec("echo '{$command }' | at '{$dateString}' 2>&1");
+
+        if (preg_match('@.*job (\d+) at .*@', $result, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    public function removeAtJob(): void
+    {
+        if ($this->getAtJobId()) {
+            shell_exec("atrm '{$this->getAtJobId()}");
+        }
     }
 }
