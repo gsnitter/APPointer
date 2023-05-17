@@ -34,8 +34,8 @@ class AlarmTimeManager
                 $newAlarmTimes[] = $newAlarmTime;
                 $this->newDates[$dateString] = true;
 
-                $atJobId = $newAlarmTime->init();
-                $newAlarmTime->setAtJobId($atJobId);
+                // $atJobId = $newAlarmTime->init();
+                // $newAlarmTime->setAtJobId($atJobId);
             }
         }
 

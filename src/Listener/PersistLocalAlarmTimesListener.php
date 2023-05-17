@@ -18,6 +18,9 @@ class PersistLocalAlarmTimesListener implements EventSubscriber
     /** @var AlarmTimeManager $em */
     private $alarmTimeManager;
 
+    /** @var string $timedPopupMessagesPath */
+    private $timedPopupMessagesPath;
+
     /**
      * @var bool[] $newDates - Keys are date strings
      */
@@ -27,6 +30,7 @@ class PersistLocalAlarmTimesListener implements EventSubscriber
     {
         $this->em = $em;
         $this->alarmTimeManager = $alarmTimeManager;
+        $this->timedPopupMessagesPath = getenv('HOME') . '/.timed_popup_messages';
     }
 
     public function getSubscribedEvents()
@@ -66,9 +70,10 @@ class PersistLocalAlarmTimesListener implements EventSubscriber
         $this->deleteTimedPopupMessages($todo);
 
         $newAlarmTimes = $this->alarmTimeManager->addAlarmTimes($todo);
+        $counter = 0;
 
         foreach($newAlarmTimes as $newAlarmTime) {
-            $this->createTimedPopupMessage($newAlarmTime);
+            $this->createTimedPopupMessage($newAlarmTime, ++$counter);
         }
 
         if ($newAlarmTimes) {
@@ -81,21 +86,22 @@ class PersistLocalAlarmTimesListener implements EventSubscriber
      */
     private function deleteTimedPopupMessages(Todo $todo): void
     {
-        $filesToDelete = glob("*_{$todo->getLocalId()}");
+        $filesToDelete = glob("*_appointer_{$todo->getLocalId()}_*");
 
         foreach ($filesToDelete as $file) {
             unlink($this->timedPopupMessagesPath . '/' . $file);
         }
     }
 
-    private function createTimedPopupMessage(AlarmTime $alarmTime): void
+    private function createTimedPopupMessage(AlarmTime $alarmTime, int $alarmTimeCounter): void
     {
-        $dateString = $alarmTime->getDate()->format('Y.m.d_H:i:s');
-        $todoId     = $alarmTime->getParentTodo()->getLocalId();
-        $fileName   = "{$dateString}_todo_{$todoId}";
+        $dateString  = $alarmTime->getDate()->format('Y_m_d_H_i_s');
+        $todoId      = $alarmTime->getParentTodo()->getLocalId();
+        $alarmTimeId = $alarmTime->getId();
+        $fileName    = "{$dateString}_appointer_{$todoId}_{$alarmTimeCounter}";
 
         file_put_contents(
-            "{$this->timedPopupMessagesPath}/{$fileName}",
+            $this->timedPopupMessagesPath . '/'. $fileName,
             $alarmTime->getParentTodo()->getText()
         );
     }

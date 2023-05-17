@@ -16,7 +16,7 @@
         "doctrine/orm": "^2",
         "doctrine/doctrine-cache-bundle": "^1.4",
         "symfony/translation": "^4.1",
-        "symfony/orm-pack": "^1.0",
+        "mtdowling/cron-expression": "^1.2"
     },
     "autoload": {
         "psr-4": {
