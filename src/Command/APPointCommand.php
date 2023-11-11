@@ -62,6 +62,7 @@ Updates the remote todo table.
 ADD_HELP
             )
             ->addOption('test', 't', InputOption::VALUE_NONE)
+            ->addOption('test2', null, InputOption::VALUE_NONE)
             ->addOption('show', 's', InputOption::VALUE_NONE)
             ->addOption('show-all', null, InputOption::VALUE_NONE)
             ->addOption('show-alarm-times', null, InputOption::VALUE_NONE)
@@ -74,7 +75,7 @@ ADD_HELP
         $this->output = $output;
         $this->input  = $input;
 
-        $commands = ['download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'show', 'show-all'];
+        $commands = ['download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'test2', 'show', 'show-all'];
         $specialCommands = ['add'];
 
         foreach ($commands as $command) {
@@ -213,6 +214,12 @@ ADD_HELP
         // echo $content;
 
         $output->renderActiveWindow();
+    }
+
+    private function test2()
+    {
+        $cron = \Cron\CronExpression::factory('0 * * * *');
+        echo $cron->getNextRunDate()->format('Y-m-d H:i:s');
     }
 
     private function showAlarmTimes()

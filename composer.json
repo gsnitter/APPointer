@@ -9,7 +9,8 @@
         "symfony/config": "^4",
         "symfony/flex": "^1.1",
         "symfony/framework-bundle": "^4.1",
-        "symfony/orm-pack": "^1.0"
+        "symfony/orm-pack": "^1.0",
+        "mtdowling/cron-expression": "^1.2"
     },
     "autoload": {
         "psr-4": {
