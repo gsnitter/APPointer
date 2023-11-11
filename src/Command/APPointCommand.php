@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use APPointer\Lib\CronHandler;
 use APPointer\Lib\TodoMerger;
 use APPointer\Lib\DI;
 use APPointer\Lib\TodosFileParser;
@@ -149,6 +150,8 @@ ADD_HELP
     }
 
     private function show() {
+        $this->container->get(CronHandler::class)->resetDateStrings();
+
         $todos = $this->getTodoRepo('default')
             ->findDueTodos();
 
@@ -157,6 +160,8 @@ ADD_HELP
 
     private function showAll()
     {
+        $this->container->get(CronHandler::class)->resetDateStrings();
+
         $todos = $this->getTodoRepo('default')
             ->findFutureTodos();
 
@@ -218,8 +223,12 @@ ADD_HELP
 
     private function test2()
     {
-        $cron = \Cron\CronExpression::factory('0 * * * *');
-        echo $cron->getNextRunDate()->format('Y-m-d H:i:s');
+        try {
+            $cron = \Cron\CronExpression::factory('a0 * * * *');
+            echo $cron->getNextRunDate()->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            echo $e->__toString();
+        }
     }
 
     private function showAlarmTimes()

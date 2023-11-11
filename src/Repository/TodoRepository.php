@@ -42,6 +42,22 @@ class TodoRepository extends EntityRepository
         return $result;
     }
 
+    public function findOutdatedCronTodos()
+    {
+        $qb = $this->createQueryBuilder('t');
+
+        $qb->select('t')
+           ->where('t.cronExpression IS NOT NULL')
+           ->andWhere($qb->expr()->orX(
+               $qb->expr()->isNull('t.date'),
+               $qb->expr()->lt('t.date',  ':now')
+           ))
+           ->setParameter('now', new \DateTime())
+           ;
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function findFutureTodos()
     {
         $qb = $this->createQueryBuilder('t');

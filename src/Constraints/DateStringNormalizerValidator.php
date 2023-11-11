@@ -33,6 +33,9 @@ class DateStringNormalizerValidator extends ConstraintValidator
             return;
         }
 
+        $this->handleCronString($dateString, $setter, $object, $constraint);
+        $dateString = $object->$getter();
+
         $date = $this->parser->normalize($dateString);
 
         if (!$date) {
@@ -47,6 +50,21 @@ class DateStringNormalizerValidator extends ConstraintValidator
                     ->addViolation();
             }
             $object->$setter($date);
+        }
+    }
+
+    public function handleCronString(string $dateString, string $setter, $object, Constraint $constraint): bool
+    {
+        try {
+            $cron = \Cron\CronExpression::factory($dateString);
+
+            $setter = $setter . 'String';
+            $object->$setter($cron->getNextRunDate()->format('Y-m-d H:i:s'));
+            $object->setCronExpression($dateString);
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
         }
     }
 }

@@ -36,6 +36,24 @@ class AddTodoTest extends WebTestCase
         $this->assertEquals(['time' => "{$dateString} 23:00", 'type' => 3], $alarmTimes[2]);
     }
 
+    public function testAddWithCronExpression()
+    {
+        $todoString = '59 23 * * *; Last beer today; 1 d; 22:50 grün/22:55/23:00 rot';
+
+        $todoString = new TodoString($todoString);
+        $todoArray = $todoString->toArray($todoString);
+        $todo = Todo::createFromArray($todoArray);
+
+        $errors = $this->validator->validate($todo, null, ['Add']);
+        $this->assertSame(0, count($errors), 'Validierungsfehler: ' . $errors);
+
+        $this->assertSame('59 23 * * *', $todo->getCronExpression());
+
+        if (date('H:i') < '23:59') {
+            $this->assertSame(date('Y-m-d 23:59:00'), $todo->getDateString());
+        }
+    }
+
     private function getDateStringFor(string $timeString): string
     {
         if (date('H:i') < $timeString) {

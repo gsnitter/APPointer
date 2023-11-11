@@ -22,6 +22,13 @@ class AbstractTodo
     protected $globalId;
 
     /**
+     * @var \DateTime $cronExpression
+     * @ORM\Column(name="cron_expression", type="string", nullable=true)
+     */
+    protected $cronExpression;
+
+
+    /**
      * @var \DateTime $date
      * @ORM\Column(name="date", type="datetime", nullable=false)
      */
@@ -130,6 +137,24 @@ class AbstractTodo
     public function getArrayRepresentation(): array
     {
         return array_filter(get_object_vars($this));
+    }
+
+    /**
+     * @param string $cronExpression
+     * @return $this
+     */
+    public function setCronExpression(string $cronExpression): Todo
+    {
+        $this->cronExpression = $cronExpression;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCronExpression(): string
+    {
+        return $this->cronExpression;
     }
 
     /**
