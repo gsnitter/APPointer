@@ -49,6 +49,7 @@ Example Usages:
   - execute appoint:add '23:00; Go to bed; 1 d; 22:50 green/22:55/23:00 red'
   - execute appoint:add 'today; Call John Doe; 0d'
   - execute appoint:add 'heute; Dzen-Messages-Commands erstellen ohne QA; 0d; 13:50 grün/14:30/15:30 rot'
+  - execute appoint:add '59 23 * * 3; Jeden Mittwoch Kitafino; 2d'
 Creates a command to add an appointment.
 ADD_HELP
             )
