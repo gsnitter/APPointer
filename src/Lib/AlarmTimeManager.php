@@ -22,6 +22,7 @@ class AlarmTimeManager
     {
         $newAlarmTimes = [];
         $newAlarmTimeArrays = $todo->getNormalizedAlarmTimes();
+
         foreach ($newAlarmTimeArrays as $newAlarmTimeArray) {
             $dateString = $newAlarmTimeArray['time'];
             $date = new \DateTime($dateString);
@@ -33,9 +34,6 @@ class AlarmTimeManager
                 $this->em->persist($newAlarmTime);
                 $newAlarmTimes[] = $newAlarmTime;
                 $this->newDates[$dateString] = true;
-
-                // $atJobId = $newAlarmTime->init();
-                // $newAlarmTime->setAtJobId($atJobId);
             }
         }
 

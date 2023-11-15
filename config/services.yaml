@@ -20,6 +20,9 @@ services:
     APPointer\Parser\:
         resource: '../src/Parser/*'
 
+    APPointer\Repository\:
+        resource: '../src/Repository/*'
+
     APPointer\Constraints\DateStringNormalizerValidator:
         class: APPointer\Constraints\DateStringNormalizerValidator
         tags:

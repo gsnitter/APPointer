@@ -44,6 +44,7 @@ class Todo extends AbstractTodo
     private $displayIntervalString;
 
     /**
+     * @ORM\Column(name="alarm_times_input", type="simple_array", nullable=true)
      * @var string|array $alarmTimes
      */
     private $alarmTimes;

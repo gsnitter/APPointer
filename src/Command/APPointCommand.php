@@ -153,15 +153,17 @@ ADD_HELP
 
     private function list() {
         $this->container->get(CronHandler::class)->resetDateStrings();
+        $this->container->get('doctrine')->getManager()->flush();
+
         $todos = $this->getTodoRepo('default')
             ->findDueTodos();
-
         return $this->showSome($todos);
     }
 
     private function listAll()
     {
         $this->container->get(CronHandler::class)->resetDateStrings();
+        $this->container->get('doctrine')->getManager()->flush();
 
         $todos = $this->getTodoRepo('default')
             ->findFutureTodos();
