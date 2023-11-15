@@ -3,21 +3,26 @@
 namespace APPointer\Lib;
 
 use APPointer\Entity\Todo;
-use Doctrine\ORM\EntityManagerInterface;
+use APPointer\Parser\AlarmTimesParser;
+use APPointer\Repository\TodoRepository;
 
 class CronHandler
 {
-    /** @var EntityManagerInterface $localEm */
-    private $localEm;
+    /** @var TodoRepository $todoRepository */
+    private $todoRepository;
 
-    public function __construct(EntityManagerInterface $localEm)
+    /** @var AlarmTimesParser $parser */
+    private $parser;
+
+    public function __construct(TodoRepository $todoRepository, AlarmTimesParser $parser)
     {
-        $this->localEm  = $localEm;
+        $this->todoRepo = $todoRepository;
+        $this->parser   = $parser;
     }
 
     public function resetDateStrings(): void
     {
-        $todos = $this->localEm->getRepository(Todo::class)->findOutdatedCronTodos();
+        $todos = $this->todoRepo->findOutdatedCronTodos();
 
         foreach ($todos as $todo) {
             $cron = \Cron\CronExpression::factory($todo->getCronExpression());
@@ -25,8 +30,16 @@ class CronHandler
             $todo
                 ->setDateString($nextDate->format('Y-m-d H:i:s'))
                 ->setDate($nextDate);
-        }
 
-        $this->localEm->flush();
+            $this->resetAlarmTimes($todo);
+        }
+    }
+
+    public function resetAlarmTimes(Todo $todo): void
+    {
+        $this->parser->setDate($todo->getDate());
+        $normalizedAlarmTimes = $this->parser->normalize($todo->getAlarmTimes());
+
+        $todo->setNormalizedAlarmTimes($normalizedAlarmTimes);
     }
 }

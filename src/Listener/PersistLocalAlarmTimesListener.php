@@ -86,10 +86,10 @@ class PersistLocalAlarmTimesListener implements EventSubscriber
      */
     private function deleteTimedPopupMessages(Todo $todo): void
     {
-        $filesToDelete = glob("*_appointer_{$todo->getLocalId()}_*");
+        $filesToDelete = glob("{$this->timedPopupMessagesPath}/*_appointer_{$todo->getLocalId()}_*");
 
         foreach ($filesToDelete as $file) {
-            unlink($this->timedPopupMessagesPath . '/' . $file);
+            unlink($file);
         }
     }
 

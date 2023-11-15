@@ -2,11 +2,21 @@
 
 namespace APPointer\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use APPointer\Entity\Todo;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 
-class TodoRepository extends EntityRepository
+class TodoRepository extends ServiceEntityRepository
 {
+    /**
+     * @param ManagerRegistry $managerRegistry
+     */
+    public function __construct(ManagerRegistry $managerRegistry)
+    {
+        parent::__construct($managerRegistry, Todo::class);
+    }
+
     public function findPossiblyDueTodosQB(): QueryBuilder
     {
         // All todos with display interval bigger than x and now <= date
@@ -54,6 +64,16 @@ class TodoRepository extends EntityRepository
            ))
            ->setParameter('now', new \DateTime())
            ;
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findCronTodos()
+    {
+        $qb = $this->createQueryBuilder('t');
+
+        $qb->select('t')
+           ->where('t.cronExpression IS NOT NULL');
 
         return $qb->getQuery()->getResult();
     }

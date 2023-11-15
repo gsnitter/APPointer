@@ -24,6 +24,7 @@ class AlarmTimesParser extends ParserBase {
         if (is_string($alarmTimes)) {
             $alarmTimes = [$alarmTimes];
         }
+
         foreach ($alarmTimes as &$alarmTime) {
             $this->addKeys($alarmTime);
             $this->addDate($alarmTime);
