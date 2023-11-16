@@ -42,7 +42,7 @@ class AbstractTodo
 
     /**
      * @var string $normalizedAlarmTimes
-     * @ORM\Column(name="alarm_times", type="json_array", nullable=true)
+     * @ORM\Column(name="alarm_times", type="json", nullable=true)
      */
     protected $normalizedAlarmTimes;
 

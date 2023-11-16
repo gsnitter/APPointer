@@ -23,8 +23,8 @@ use APPointer\Entity\TodoString;
 use APPointer\Lib\Normalizer;
 use APPointer\Lib\Filesystem;
 use APPointer\Lib\AtJobs\AtJobs;
+use APPointer\Repository\TodoRepository;
 use Sni\ExtendedOutputBundle\Service\ExtendedOutput;
-use Doctrine\Common\Persistence\ObjectRepository;
 use APPointer\Entity\AlarmTime;
 
 class APPointCommand extends Command
@@ -143,7 +143,7 @@ ADD_HELP
         $localEm->flush();
     }
 
-    private function getTodoRepo(string $managerName): ObjectRepository
+    private function getTodoRepo(string $managerName): TodoRepository
     {
         return $this->container
             ->get('doctrine')

@@ -4,8 +4,8 @@ namespace APPointer\Repository;
 
 use APPointer\Entity\Todo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 
 class TodoRepository extends ServiceEntityRepository
 {

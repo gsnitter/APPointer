@@ -2,13 +2,13 @@
 
 namespace APPointer\Listener;
 
-use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\EntityManagerInterface;
-use APPointer\Entity\Todo;
 use APPointer\Entity\AlarmTime;
+use APPointer\Entity\Todo;
 use APPointer\Lib\AlarmTimeManager;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Events;
 
 class PersistLocalAlarmTimesListener implements EventSubscriber
 {
