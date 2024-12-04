@@ -70,7 +70,8 @@ ADD_HELP
             ->addOption('schedule-todays-alarmtimes', 's', InputOption::VALUE_NONE)
             ->addOption('show-alarm-times', null, InputOption::VALUE_NONE)
             ->addOption('hide-alarm-time', null, InputOption::VALUE_NONE)
-            ->addOption('delete', 'd', InputOption::VALUE_REQUIRED)
+            ->addOption('delete', null, InputOption::VALUE_REQUIRED)
+            ->addOption('disable', 'd', InputOption::VALUE_REQUIRED, 'Bleibt im Gegensatz zu delete in der DB')
             ;
     }
 
@@ -79,7 +80,7 @@ ADD_HELP
         $this->output = $output;
         $this->input  = $input;
 
-        $commands = ['delete', 'download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'list', 'list-all', 'schedule-todays-alarmtimes'];
+        $commands = ['delete', 'disable', 'download', 'upload', 'add', 'show-alarm-times', 'hide-alarm-time', 'test', 'list', 'list-all', 'schedule-todays-alarmtimes'];
         $specialCommands = ['add'];
 
         foreach ($commands as $command) {
@@ -262,7 +263,7 @@ ADD_HELP
     {
         $em = $this->container->get('doctrine')->getManager();
         $todos = $em->getRepository(Todo::class)
-            ->findBy(['repeatable' => true])
+            ->findBy(['repeatable' => true, 'disabled' => null])
             ;
 
         // Recalculates alarmTimes using dateString
@@ -287,6 +288,16 @@ ADD_HELP
             ->findOneBy(['localId' => $this->input->getOption('delete')])
             ;
         $em->remove($todo);
+        $em->flush();
+    }
+
+    private function disable(): void
+    {
+        $em = $this->container->get('doctrine')->getManager();
+        $todo = $em->getRepository(Todo::class)
+            ->findOneBy(['localId' => $this->input->getOption('disable')])
+            ;
+        $todo->disable();
         $em->flush();
     }
 }

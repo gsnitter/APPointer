@@ -34,6 +34,7 @@ class TodoRepository extends ServiceEntityRepository
                 $qb->expr()->lte('t.date', ':nowPlusX'),
                 $qb->expr()->gte('t.date', ':now')
            ))
+           ->andWhere('t.disabled IS NULL')
             ->orderBy('t.date', 'DESC')
             ->setParameter('interval', '+P00Y00M20DT00H00M00S')
             ->setParameter('now', new \DateTime())
@@ -73,7 +74,8 @@ class TodoRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('t');
 
         $qb->select('t')
-           ->where('t.cronExpression IS NOT NULL');
+           ->where('t.cronExpression IS NOT NULL')
+           ->andWhere('t.disabled IS NULL');
 
         return $qb->getQuery()->getResult();
     }
@@ -84,6 +86,7 @@ class TodoRepository extends ServiceEntityRepository
 
         $qb = $qb->select('t')
             ->where($qb->expr()->gte('t.date', ':now'))
+           ->andWhere('t.disabled IS NULL')
             ->setParameter('now', new \DateTime());
 
         return $qb->getQuery()->getResult();

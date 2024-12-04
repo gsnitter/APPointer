@@ -55,6 +55,12 @@ class Todo extends AbstractTodo
      */
     private $alarmTimeEntities;
 
+    /**
+     * @var DateTimeInterface $disabled
+     * @ORM\Column(name="disabled", type="datetime", nullable=true)
+     */
+    private $disabled;
+
     public function __construct()
     {
         $this->alarmTimeEntities = new ArrayCollection();
@@ -146,5 +152,21 @@ class Todo extends AbstractTodo
     public function getAlarmTimeEntities(): Collection
     {
         return $this->alarmTimeEntities;
+    }
+
+    public function getDisabled(): ?DateTime
+    {
+        return $this->disabled;
+    }
+
+    public function isDisabled(): ?DateTime
+    {
+        return !!$this->disabled;
+    }
+
+    public function disable(): Todo
+    {
+        $this->disabled = new \DateTime();
+        return $this;
     }
 }
